@@ -99,7 +99,7 @@ var ANS=[{l:"A",s:"▲"},{l:"B",s:"◆"},{l:"C",s:"●"},{l:"D",s:"■"}];
 /* v3.4 : des lettres A B C D (comme sur une grille de QCM) à la place des formes */
 var SHAPES=["A","B","C","D","E","F"];
 var MODES={
-  solo:{id:"solo",nom:"Un contre tous",court:"Un contre tous",desc:"Chacun joue pour soi : pas d’équipe, un classement individuel et un podium des 3 meilleurs."},
+  solo:{id:"solo",nom:"Un contre tous",court:"Un contre tous",desc:"Chacun joue pour soi : pas d’équipe, un classement individuel et la guirlande des 3 meilleurs."},
   duel:{id:"duel",nom:"Duel d’équipes",court:"Duel",desc:"Les élèves rejoignent une équipe en glissant leur prénom. Score d’équipe = moyenne de ses membres."},
   boss:{id:"boss",nom:"La Classe VS le Prof",court:"Classe VS Prof",desc:"Toute la classe affronte le prof, qui peut jouer depuis son téléphone : bonnes réponses = dégâts sur l’adversaire."}
 };
@@ -108,7 +108,7 @@ var MAX_PLAYERS=30;
 /* ─── règles affichées avant chaque partie (prof et élèves) ─── */
 var RULES={
   common:[["bolt","De 500 à 1 000 points par bonne réponse : plus on répond vite, plus on gagne."],["flame","Série : +50 points par bonne réponse d’affilée (jusqu’à +250)."],["keyb","Saisie libre au clavier : points ×1,5. Toutes les écritures équivalentes sont acceptées."],["tiles","Tuiles à associer ou à remettre dans l’ordre : points partiels si une partie est juste."],["target","Estimation au curseur : zone verte = tous les points, zone orange = la moitié."],["cross","Erreur ou pas de réponse : 0 point, mais aucune pénalité."]],
-  solo:[["user","Chacun joue pour soi, sans équipe."],["trophy","Le classement change à chaque question ; les 3 meilleurs montent sur le podium."]],
+  solo:[["user","Chacun joue pour soi, sans équipe."],["trophy","Le classement change à chaque question ; à la fin, les 3 meilleurs allument la guirlande."]],
   duel:[["users","Points de l’équipe à chaque question = moyenne des points de ses membres (un membre qui ne répond pas compte 0)."],["star","Bonus de 200 points si tous les membres de l’équipe trouvent la bonne réponse."],["rocket","Les fusées avancent : l’équipe en tête à la fin gagne."]],
   boss:[["heart","La classe et le prof ont chacun 100 points de vie."],["star","Chaque bonne réponse de la classe inflige des dégâts à la jauge de vie du prof : il encaisse 1,5 fois plus que la classe (100 % de réussite = coup critique ×1,5)."],["bolt","Les erreurs et les absences de réponse infligent des dégâts à la jauge de vie de la classe."],["shield","Le prof répond aussi sur son téléphone : s’il trouve, il inflige des dégâts à la jauge de vie de la classe ; s’il se trompe, sa propre jauge baisse."],["trophy","À la fin, le camp qui a gardé le plus de vie gagne."]]
 };

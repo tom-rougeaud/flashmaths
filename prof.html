@@ -1144,12 +1144,12 @@ body.v-mob .g-choices.veil:after{font-size:1.1rem}
   <button type="button" class="x" aria-label="Fermer">✕</button>
   <h2>Aide rapide</h2>
   <ol class="help">
-    <li><b>Choisir</b> : le mode de jeu, un niveau, puis des notions (ou « Surprends-moi »).</li>
+    <li><b>Choisir</b> : le mode de jeu et les réglages (temps de lecture, points), puis un niveau : son programme s’affiche dessous, chapitre › sous-chapitre › notion. Cochez des notions, un sous-chapitre ou un chapitre entier (ou « Surprends-moi »).</li>
     <li><b>Générer</b> : vérifiez les questions (réponses masquées tant que vous ne cochez pas « Afficher les réponses »). Cliquez sur un texte pour le modifier, glissez pour réordonner.</li>
     <li><b>Ouvrir la salle</b> : les élèves vont sur la page élève, tapent le code et leur prénom (30 élèves maximum).</li>
     <li><b>Duel</b> : chaque élève glisse son jeton dans une équipe ; vous pouvez renommer les équipes et déplacer les élèves.</li>
     <li><b>Classe VS Prof</b> : « Afficher le code prof » donne le code à taper sur votre téléphone pour jouer contre la classe.</li>
-    <li><b>Jouer</b> : les règles s’affichent, puis les questions. « Joueurs » permet de renommer, d’exclure ou de faire entrer un retardataire (QR code). « +30 s » rallonge, « Écourter » passe au podium.</li>
+    <li><b>Jouer</b> : les règles s’affichent, puis les questions. « Joueurs » permet de renommer, d’exclure ou de faire entrer un retardataire (QR code). Les prénoms s’empilent à droite à mesure que les élèves répondent. « +30 s » rallonge, « Écourter » passe directement aux gagnants.</li>
   </ol>
   <p class="muted small">Plusieurs salles peuvent être ouvertes en même temps sur des ordinateurs différents : chaque salle a son propre code.</p>
 </div></div>
@@ -3568,7 +3568,7 @@ var ANS=[{l:"A",s:"▲"},{l:"B",s:"◆"},{l:"C",s:"●"},{l:"D",s:"■"}];
 /* v3.4 : des lettres A B C D (comme sur une grille de QCM) à la place des formes */
 var SHAPES=["A","B","C","D","E","F"];
 var MODES={
-  solo:{id:"solo",nom:"Un contre tous",court:"Un contre tous",desc:"Chacun joue pour soi : pas d’équipe, un classement individuel et un podium des 3 meilleurs."},
+  solo:{id:"solo",nom:"Un contre tous",court:"Un contre tous",desc:"Chacun joue pour soi : pas d’équipe, un classement individuel et la guirlande des 3 meilleurs."},
   duel:{id:"duel",nom:"Duel d’équipes",court:"Duel",desc:"Les élèves rejoignent une équipe en glissant leur prénom. Score d’équipe = moyenne de ses membres."},
   boss:{id:"boss",nom:"La Classe VS le Prof",court:"Classe VS Prof",desc:"Toute la classe affronte le prof, qui peut jouer depuis son téléphone : bonnes réponses = dégâts sur l’adversaire."}
 };
@@ -3577,7 +3577,7 @@ var MAX_PLAYERS=30;
 /* ─── règles affichées avant chaque partie (prof et élèves) ─── */
 var RULES={
   common:[["bolt","De 500 à 1 000 points par bonne réponse : plus on répond vite, plus on gagne."],["flame","Série : +50 points par bonne réponse d’affilée (jusqu’à +250)."],["keyb","Saisie libre au clavier : points ×1,5. Toutes les écritures équivalentes sont acceptées."],["tiles","Tuiles à associer ou à remettre dans l’ordre : points partiels si une partie est juste."],["target","Estimation au curseur : zone verte = tous les points, zone orange = la moitié."],["cross","Erreur ou pas de réponse : 0 point, mais aucune pénalité."]],
-  solo:[["user","Chacun joue pour soi, sans équipe."],["trophy","Le classement change à chaque question ; les 3 meilleurs montent sur le podium."]],
+  solo:[["user","Chacun joue pour soi, sans équipe."],["trophy","Le classement change à chaque question ; à la fin, les 3 meilleurs allument la guirlande."]],
   duel:[["users","Points de l’équipe à chaque question = moyenne des points de ses membres (un membre qui ne répond pas compte 0)."],["star","Bonus de 200 points si tous les membres de l’équipe trouvent la bonne réponse."],["rocket","Les fusées avancent : l’équipe en tête à la fin gagne."]],
   boss:[["heart","La classe et le prof ont chacun 100 points de vie."],["star","Chaque bonne réponse de la classe inflige des dégâts à la jauge de vie du prof : il encaisse 1,5 fois plus que la classe (100 % de réussite = coup critique ×1,5)."],["bolt","Les erreurs et les absences de réponse infligent des dégâts à la jauge de vie de la classe."],["shield","Le prof répond aussi sur son téléphone : s’il trouve, il inflige des dégâts à la jauge de vie de la classe ; s’il se trompe, sa propre jauge baisse."],["trophy","À la fin, le camp qui a gardé le plus de vie gagne."]]
 };
@@ -8426,7 +8426,7 @@ function resumeGame(s){
       G.phase="rv";showGameScreen();
       if(G.i>=0&&G.hist[G.i])renderRevealFromHist(G.i);
       else{G.i=Math.max(-1,G.i-1);}
-      $("g-next").innerHTML=ICO.next+(G.i+1>=G.qs.length?"Voir le podium":"Question suivante");
+      $("g-next").innerHTML=ICO.next+(G.i+1>=G.qs.length?"Voir les gagnants":"Question suivante");
       toast("Partie reprise : cliquez sur « Question suivante ».","ok");
     }
   }).catch(function(e){
@@ -8702,20 +8702,20 @@ function renderReveal(h,boost,dmg){
   else if(G.mode==="boss"){bossUpdate(sc,G.boss,dmg);if(G.boss.pp<=0&&dmg&&dmg.toProf>0)setTimeout(function(){fxStamp("K.O. !","#8A6CC9","star");confetti({rain:true,n:140});},1300);}
   else{leaderUpdate(sc,rankList(),G.prevRanks);var pr={};rankList().forEach(function(x,i){pr[x.id]=i;});G.prevRanks=pr;}
   var last=h.i+1>=G.qs.length;
-  $("g-next").innerHTML=ICO.next+(last?"Voir le podium":"Question suivante");$("g-plus").disabled=true;
+  $("g-next").innerHTML=ICO.next+(last?"Voir les gagnants":"Question suivante");$("g-plus").disabled=true;
   updateAnswered();
   if(G.auto)startAuto();
 }
 function startAuto(){
   clearInterval(G.autoT);
   if(!G||G.phase!=="rv")return;
-  var last=G.i+1>=G.qs.length,s=10;$("g-next").innerHTML=ICO.next+(last?"Podium":"Suivante")+" ("+s+")";
-  G.autoT=setInterval(function(){s--;if(!G||G.phase!=="rv"||!G.auto){clearInterval(G&&G.autoT);return;}if(s<=0){clearInterval(G.autoT);nextQuestion();}else $("g-next").innerHTML=ICO.next+(last?"Podium":"Suivante")+" ("+s+")";},1000);
+  var last=G.i+1>=G.qs.length,s=10;$("g-next").innerHTML=ICO.next+(last?"Gagnants":"Suivante")+" ("+s+")";
+  G.autoT=setInterval(function(){s--;if(!G||G.phase!=="rv"||!G.auto){clearInterval(G&&G.autoT);return;}if(s<=0){clearInterval(G.autoT);nextQuestion();}else $("g-next").innerHTML=ICO.next+(last?"Gagnants":"Suivante")+" ("+s+")";},1000);
 }
 function autoBtn(){var b=$("g-auto");if(!b||!G)return;b.classList.toggle("on",!!G.auto);b.innerHTML=(G.auto?ICO.play:ICO.pause||ICO.clock)+"Auto : "+(G.auto?"oui":"non");}
 $("g-auto").addEventListener("click",function(){
   if(!G)return;G.auto=!G.auto;autoBtn();
-  if(G.phase==="rv"){if(G.auto)startAuto();else{clearInterval(G.autoT);var last=G.i+1>=G.qs.length;$("g-next").innerHTML=ICO.next+(last?"Voir le podium":"Question suivante");}}
+  if(G.phase==="rv"){if(G.auto)startAuto();else{clearInterval(G.autoT);var last=G.i+1>=G.qs.length;$("g-next").innerHTML=ICO.next+(last?"Voir les gagnants":"Question suivante");}}
   toast(G.auto?"Enchaînement automatique activé (10 s après chaque correction).":"Enchaînement automatique désactivé : vous passez à la suite quand vous voulez.");
 });
 /* fenêtre : réponse de chaque joueur (individuel, ou groupé par équipe en duel) */
@@ -8841,7 +8841,7 @@ function endGame(early){
   hostPing(false);snapshot();
   /* écran de fin */
   show("s-end");
-  $("end-title").textContent=G.mode==="boss"?"Fin du combat !":"Et le podium est…";
+  $("end-title").textContent=G.mode==="boss"?"Fin du combat !":"Qui allume la guirlande ?";
   $("end-sub").textContent=sub;$("end-body").classList.add("hidden");
   var anim=$("end-anim");
   if(G.mode==="boss"){

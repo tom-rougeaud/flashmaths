@@ -263,20 +263,20 @@ function renderReveal(h,boost,dmg){
   else if(G.mode==="boss"){bossUpdate(sc,G.boss,dmg);if(G.boss.pp<=0&&dmg&&dmg.toProf>0)setTimeout(function(){fxStamp("K.O. !","#8A6CC9","star");confetti({rain:true,n:140});},1300);}
   else{leaderUpdate(sc,rankList(),G.prevRanks);var pr={};rankList().forEach(function(x,i){pr[x.id]=i;});G.prevRanks=pr;}
   var last=h.i+1>=G.qs.length;
-  $("g-next").innerHTML=ICO.next+(last?"Voir le podium":"Question suivante");$("g-plus").disabled=true;
+  $("g-next").innerHTML=ICO.next+(last?"Voir les gagnants":"Question suivante");$("g-plus").disabled=true;
   updateAnswered();
   if(G.auto)startAuto();
 }
 function startAuto(){
   clearInterval(G.autoT);
   if(!G||G.phase!=="rv")return;
-  var last=G.i+1>=G.qs.length,s=10;$("g-next").innerHTML=ICO.next+(last?"Podium":"Suivante")+" ("+s+")";
-  G.autoT=setInterval(function(){s--;if(!G||G.phase!=="rv"||!G.auto){clearInterval(G&&G.autoT);return;}if(s<=0){clearInterval(G.autoT);nextQuestion();}else $("g-next").innerHTML=ICO.next+(last?"Podium":"Suivante")+" ("+s+")";},1000);
+  var last=G.i+1>=G.qs.length,s=10;$("g-next").innerHTML=ICO.next+(last?"Gagnants":"Suivante")+" ("+s+")";
+  G.autoT=setInterval(function(){s--;if(!G||G.phase!=="rv"||!G.auto){clearInterval(G&&G.autoT);return;}if(s<=0){clearInterval(G.autoT);nextQuestion();}else $("g-next").innerHTML=ICO.next+(last?"Gagnants":"Suivante")+" ("+s+")";},1000);
 }
 function autoBtn(){var b=$("g-auto");if(!b||!G)return;b.classList.toggle("on",!!G.auto);b.innerHTML=(G.auto?ICO.play:ICO.pause||ICO.clock)+"Auto : "+(G.auto?"oui":"non");}
 $("g-auto").addEventListener("click",function(){
   if(!G)return;G.auto=!G.auto;autoBtn();
-  if(G.phase==="rv"){if(G.auto)startAuto();else{clearInterval(G.autoT);var last=G.i+1>=G.qs.length;$("g-next").innerHTML=ICO.next+(last?"Voir le podium":"Question suivante");}}
+  if(G.phase==="rv"){if(G.auto)startAuto();else{clearInterval(G.autoT);var last=G.i+1>=G.qs.length;$("g-next").innerHTML=ICO.next+(last?"Voir les gagnants":"Question suivante");}}
   toast(G.auto?"Enchaînement automatique activé (10 s après chaque correction).":"Enchaînement automatique désactivé : vous passez à la suite quand vous voulez.");
 });
 /* fenêtre : réponse de chaque joueur (individuel, ou groupé par équipe en duel) */

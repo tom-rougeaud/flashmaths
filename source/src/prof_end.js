@@ -32,7 +32,7 @@ function endGame(early){
   hostPing(false);snapshot();
   /* écran de fin */
   show("s-end");
-  $("end-title").textContent=G.mode==="boss"?"Fin du combat !":"Et le podium est…";
+  $("end-title").textContent=G.mode==="boss"?"Fin du combat !":"Qui allume la guirlande ?";
   $("end-sub").textContent=sub;$("end-body").classList.add("hidden");
   var anim=$("end-anim");
   if(G.mode==="boss"){

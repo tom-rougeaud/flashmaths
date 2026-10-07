@@ -256,7 +256,7 @@ function resumeGame(s){
       G.phase="rv";showGameScreen();
       if(G.i>=0&&G.hist[G.i])renderRevealFromHist(G.i);
       else{G.i=Math.max(-1,G.i-1);}
-      $("g-next").innerHTML=ICO.next+(G.i+1>=G.qs.length?"Voir le podium":"Question suivante");
+      $("g-next").innerHTML=ICO.next+(G.i+1>=G.qs.length?"Voir les gagnants":"Question suivante");
       toast("Partie reprise : cliquez sur « Question suivante ».","ok");
     }
   }).catch(function(e){

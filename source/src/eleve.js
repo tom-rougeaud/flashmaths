@@ -214,7 +214,7 @@ function renderLobby(){
   }else if(S.mode==="boss"){
     h='<div class="card wait-card"><div style="max-width:11rem;margin:0 auto">'+bossSvg()+'</div><h2>Toute la classe contre le prof !</h2><p class="muted">Chaque bonne réponse fait perdre des points de vie au prof. Unissez-vous !</p><div class="dots"><span></span><span></span><span></span></div></div>';
   }else{
-    h='<div class="card wait-card">'+KID_SVG+'<h2>Un contre tous</h2><p class="muted">Tu joues pour toi : sois rapide et précis pour monter sur le podium !</p><div class="dots"><span></span><span></span><span></span></div></div>';
+    h='<div class="card wait-card">'+KID_SVG+'<h2>Un contre tous</h2><p class="muted">Tu joues pour toi : sois précis pour allumer une ampoule de la guirlande !</p><div class="dots"><span></span><span></span><span></span></div></div>';
   }
   $("lb-body").innerHTML=h;
 }
@@ -518,7 +518,7 @@ function showEnd(m){
   clearInterval(S.timer);
   S.phase="end";
   var r=m.rk&&m.rk[S.pid];
-  $("end-t").textContent=m.title||"Le podium";
+  $("end-t").textContent=m.title||"Les gagnants";
   $("end-pod").innerHTML=podiumHtml(m.pod||[]);
   var me="";
   if(r){
