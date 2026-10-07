@@ -1,0 +1,12 @@
+{
+  "name": "flashmaths-source",
+  "private": true,
+  "description": "Flash Maths : bibliothèques intégrées dans les pages par build.py (aucun CDN).",
+  "scripts": { "build": "python3 build.py", "test": "node test/bank_test.js 300" },
+  "dependencies": {
+    "@fontsource/nunito": "5.3.0",
+    "@supabase/supabase-js": "2.117.2",
+    "katex": "0.18.10",
+    "qrcode-generator": "2.0.4"
+  }
+}

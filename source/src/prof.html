@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>Flash Maths — Espace prof</title>
+<!--@@FAVICON@@-->
+<style>
+/*@@THEMECSS@@*/
+/*@@KATEXCSS@@*/
+/*@@FXCSS@@*/
+/*@@PROFCSS@@*/
+</style>
+</head>
+<body class="v-proj">
+<header class="top">
+  <span id="brand"></span>
+  <span class="pill wait" id="netpill" title="État de la connexion à la base"><i></i><span>connexion…</span></span>
+  <span class="sp"></span>
+  <div class="tools">
+    <div class="zoom" id="zoom"></div>
+    <div class="vsw" id="vsw" role="group" aria-label="Affichage"><button type="button" data-v="proj">Projection</button><button type="button" data-v="mob">Mobile</button></div>
+    <button type="button" class="ibtn" id="b-sound" title="Couper / remettre le son"></button>
+    <button type="button" class="ibtn" id="b-full" title="Plein écran"></button>
+    <div class="menu-w">
+      <button type="button" class="ibtn" id="b-menu" title="Menu" aria-haspopup="true"></button>
+      <div class="menu hidden" id="menu">
+        <button type="button" data-m="hist">Historique des parties</button>
+        <button type="button" data-m="mine">Mes questions (importer, exporter)</button>
+        <button type="button" data-m="diag">Diagnostic de la base</button>
+        <button type="button" data-m="help">Aide rapide</button>
+        <a href="contact.html">Contact</a>
+        <a href="confidentialite.html">Confidentialité</a>
+        <a href="index.html">Accueil</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="app">
+  <div id="dbwarn" class="hidden"></div>
+
+  <!-- ═══ 1. CHOISIR ═══ -->
+  <section id="s-pick" class="screen">
+    <ol class="steps"><li class="on">Choisir</li><li>Vérifier</li><li>Salle</li><li>Jouer</li></ol>
+    <div id="resume"></div>
+    <div class="card mode-card"><h2 class="mc-h">Mode de jeu</h2><div class="modes" id="modes"></div></div>
+    <details class="acc" id="acc-set">
+      <summary><span>Réglages de la partie</span><span class="muted small" id="set-sum"></span></summary>
+      <div class="acc-b">
+        <div class="set-grid">
+          <div><label class="lbl">Nombre de questions</label><div class="seg" id="seg-nq"></div></div>
+          <div><label class="lbl">Temps de réponse</label><div class="seg" id="seg-dur"></div></div>
+          <div><label class="lbl">Temps de lecture avant les propositions</label><div class="seg" id="seg-read"></div></div>
+          <div><label class="lbl">Points</label><div class="seg" id="seg-pts"></div></div>
+          <div><label class="lbl">Ordre des questions</label><div class="seg" id="seg-ord"></div></div>
+          <div><label class="lbl">Format des réponses</label><div class="seg" id="seg-fmt"></div></div>
+          <div id="w-teams"><label class="lbl">Nombre d’équipes</label><div class="seg" id="seg-nt"></div></div>
+          <div class="set-full opts">
+            <label class="sw"><input type="checkbox" id="o-vary"><i></i>Formats variés : tuiles à associer, remise en ordre, étape fausse à trouver</label>
+            <label class="sw"><input type="checkbox" id="o-est"><i></i>Calculs longs : une partie en estimation au curseur (ordre de grandeur)</label>
+            <label class="sw"><input type="checkbox" id="o-hide"><i></i>Masquer les propositions au tableau (elles restent sur les téléphones)</label>
+            <label class="sw"><input type="checkbox" id="o-auto"><i></i>Enchaîner automatiquement les questions (10 s après la correction) — toujours activé au départ en « Classe VS Prof », modifiable pendant la partie</label>
+            <label class="sw"><input type="checkbox" id="o-names"><i></i>Afficher qui a bien ou mal répondu après chaque question</label>
+            <label class="sw"><input type="checkbox" id="o-early"><i></i>Corriger dès que tout le monde a répondu</label>
+          </div>
+        </div>
+      </div>
+    </details>
+    <div class="card pick-head">
+      <h1>Que révise-t-on aujourd’hui ?</h1>
+      <div class="lvl-row"><span class="lbl-in">Niveau</span><div class="seg" id="lvls"></div></div>
+      <div class="search"><input class="inp" id="q-search" type="search" placeholder="Rechercher : pythagore, pourcentage, médiane…" autocomplete="off"></div>
+      <div class="pick-actions">
+        <button type="button" class="btn btn-soft" id="b-surprise"></button>
+        <button type="button" class="btn btn-ghost" id="b-import"></button>
+        <button type="button" class="btn btn-ghost" id="b-newq"></button>
+        <button type="button" class="btn btn-ghost" id="b-clear">Tout décocher</button>
+      </div>
+      <div id="tree" class="tree"></div>
+    </div>
+
+    <div class="genbar">
+      <span id="sel-count" class="muted">Aucune notion cochée</span>
+      <button type="button" class="btn btn-go btn-big" id="b-gen" disabled></button>
+    </div>
+  </section>
+
+  <!-- ═══ 2. VÉRIFIER / MODIFIER ═══ -->
+  <section id="s-prev" class="screen hidden">
+    <ol class="steps"><li class="done">Choisir</li><li class="on">Vérifier</li><li>Salle</li><li>Jouer</li></ol>
+    <div class="card pv-head">
+      <div><h1 id="pv-title">Vos questions</h1><div class="muted" id="pv-sub"></div></div>
+      <div class="pv-tools">
+        <button type="button" class="btn btn-ghost" id="pv-back">← Modifier la sélection</button>
+        <button type="button" class="btn btn-soft" id="pv-regen"></button>
+        <label class="sw"><input type="checkbox" id="pv-show"><i></i>Afficher les réponses</label>
+      </div>
+    </div>
+    <div class="muted small pv-hint">Cliquez sur un texte pour le modifier · glissez la poignée pour réordonner · « Nouveau tirage » change les nombres.</div>
+    <div id="pv-list" class="hideans"></div>
+    <button type="button" class="btn btn-soft btn-block" id="pv-add"></button>
+    <div class="genbar">
+      <span id="pv-count" class="muted"></span>
+      <button type="button" class="btn btn-go btn-big" id="b-open"></button>
+    </div>
+  </section>
+
+  <!-- ═══ 3. SALLE ═══ -->
+  <section id="s-lobby" class="screen hidden">
+    <ol class="steps"><li class="done">Choisir</li><li class="done">Vérifier</li><li class="on">Salle</li><li>Jouer</li></ol>
+    <div class="lobby">
+      <div class="card join-card">
+        <div class="jc-l">Rejoignez la partie sur</div>
+        <div class="jc-url" id="lb-url"></div>
+        <div class="jc-code-l">avec le code</div>
+        <div class="jc-code" id="lb-code">····</div>
+        <button type="button" class="jc-qr" id="lb-qr" title="Agrandir le QR code"></button>
+        <button type="button" class="btn btn-sm jc-big" id="lb-qrbig">Agrandir le QR code en plein écran</button>
+        <div class="jc-count"><b id="lb-n">0</b> / <span id="lb-max">30</span> élèves</div>
+      </div>
+      <div class="lobby-r">
+        <div class="lb-head"><h2 id="lb-title">Les équipes</h2><div class="lb-tools" id="lb-tools"></div></div>
+        <div id="lb-zone"></div>
+        <div class="lb-actions">
+          <button type="button" class="btn btn-ghost" id="lb-close">Fermer la salle</button>
+          <button type="button" class="btn btn-soft" id="lb-players"></button>
+          <button type="button" class="btn btn-soft hidden" id="lb-hostcode"></button>
+          <button type="button" class="btn btn-go btn-xl" id="lb-start"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 4. JEU ═══ -->
+  <section id="s-game" class="screen hidden">
+    <div class="g-top">
+      <div class="g-qn" id="g-qn">Question 1 / 10</div>
+      <div class="g-ans" id="g-ans"></div>
+      <div class="g-host hidden" id="g-host"></div>
+      <span class="sp"></span>
+      <button type="button" class="btn btn-sm btn-soft" id="g-players"></button>
+      <button type="button" class="btn btn-sm btn-soft" id="g-plus">+30 s</button>
+      <button type="button" class="btn btn-sm btn-primary" id="g-next"></button>
+      <button type="button" class="btn btn-sm btn-soft g-auto" id="g-auto" title="Enchaîner automatiquement 10 s après chaque correction"></button>
+      <button type="button" class="btn btn-sm btn-ghost" id="g-short">Écourter</button>
+    </div>
+    <div class="away-bar hidden" id="g-away"></div>
+    <div class="g-stage">
+      <div class="g-qbox card" id="g-qbox">
+        <div class="g-timer" id="g-timer"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="tr-bg"/><circle cx="50" cy="50" r="44" class="tr-fg" id="g-ring"/></svg><b id="g-sec">20</b></div>
+        <div class="g-meta" id="g-meta"></div>
+        <div class="g-q" id="g-q"></div>
+        <div class="g-choices" id="g-choices"></div>
+        <div class="g-rev hidden" id="g-rev"></div>
+      </div>
+      <aside class="g-live" id="g-live" aria-live="polite"><div class="gl-h"><span class="gl-bulb" aria-hidden="true"></span><span><b id="gl-n">0</b> <span id="gl-t">réponse</span></span></div><ol class="gl-list" id="gl-list"></ol></aside>
+      <div class="g-scene card" id="g-scene"></div>
+    </div>
+    <div class="g-rules hidden" id="g-rules"><div class="rules-box" id="rules-box"></div></div>
+    <div class="g-cd hidden" id="g-cd"><div class="cd-bulbs" id="g-cdb" aria-hidden="true"><i></i><i></i><i></i></div><span id="g-cdt">Prêts ?</span></div>
+  </section>
+
+  <!-- ═══ 5. FIN ═══ -->
+  <section id="s-end" class="screen hidden">
+    <div class="end-head"><h1 id="end-title">Et le grand gagnant est…</h1><div class="muted" id="end-sub"></div></div>
+    <div id="end-anim"></div>
+    <div class="end-body hidden" id="end-body">
+      <div class="end-actions">
+        <button type="button" class="btn btn-go btn-big" id="end-again">Rejouer avec la même salle</button>
+        <button type="button" class="btn btn-soft btn-big" id="end-new">Nouvelle partie</button>
+      </div>
+      <details class="acc" open><summary>Classement complet</summary><div class="acc-b" id="end-rank"></div></details>
+      <details class="acc" open><summary>Diagnostic : erreurs types et notions à retravailler</summary><div class="acc-b" id="end-diag"></div></details>
+      <details class="acc"><summary>Bilan question par question</summary><div class="acc-b" id="end-qs"></div></details>
+      <details class="acc"><summary>Exporter les résultats</summary><div class="acc-b">
+        <p class="muted">Fichiers CSV (tableur), pseudonymes uniquement.</p>
+        <button type="button" class="btn btn-soft" id="end-csv1">Résultats par élève</button>
+        <button type="button" class="btn btn-soft" id="end-csv2">Bilan par question</button>
+      </div></details>
+    </div>
+  </section>
+  <div id="foot"></div>
+</main>
+
+<!-- ═══ FENÊTRES ═══ -->
+<div class="modal hidden" id="m-import"><div class="box wide">
+  <button type="button" class="x" aria-label="Fermer">✕</button>
+  <h2>Importer des questions</h2>
+  <div class="imp">
+    <div class="imp-l">
+      <div class="info imp-help">
+        <b>Le plus simple : collez vos questions comme ceci.</b>
+        <ul>
+          <li>1ʳᵉ ligne = l’énoncé ; puis une proposition par ligne.</li>
+          <li>Un <code>*</code> devant la <b>bonne</b> réponse (1 à 3 mauvaises réponses).</li>
+          <li><code>= 4,5</code> pour une question à <b>saisie libre</b> (nombre, % ou expression en x). Toutes les écritures équivalentes sont acceptées : 4,5 = 4,50 = 450 % = 9/2.</li>
+          <li><b>Tuiles à associer</b> : une paire par ligne, <code>$6 \times 7$ =&gt; 42</code> (2 à 5 paires).</li>
+          <li><b>Remettre dans l’ordre</b> : les tuiles numérotées dans le bon ordre, <code>1. 0,05</code> <code>2. 0,5</code>… (3 à 6) ; elles seront mélangées.</li>
+          <li><b>Estimation au curseur</b> : <code>~ 1008</code>, ou avec les bornes <code>~ 1008 [0 ; 2000]</code>, l’unité et la tolérance <code>~ 12 kg [0 ; 50] ± 2</code>.</li>
+          <li>Une <b>ligne vide</b> entre deux questions.</li>
+          <li>Facultatif : <code># Titre</code> pour nommer la notion, <code>&gt; explication</code>, <code>@ 45</code> pour 45 secondes.</li>
+          <li>Formules : entre dollars, par ex. <code>$\dfrac{3}{4}$</code>, <code>$x^2$</code>, <code>$\sqrt{2}$</code>, <code>$u_n$</code>.</li>
+        </ul>
+        <button type="button" class="btn btn-sm btn-soft" id="imp-ex">Insérer l’exemple</button>
+        <label class="btn btn-sm btn-soft">Ouvrir un fichier .txt ou .json<input type="file" id="imp-file" accept=".txt,.json,text/plain,application/json" hidden></label>
+      </div>
+      <textarea class="inp imp-ta" id="imp-ta" rows="14" placeholder="Collez ou tapez vos questions ici…" spellcheck="false"></textarea>
+      <div class="imp-meta">
+        <div><label class="lbl">Nom de la notion</label><input class="inp" id="imp-title" maxlength="90" placeholder="Mes questions"></div>
+        <div><label class="lbl">Niveaux</label><div class="nivs" id="imp-niv"></div></div>
+      </div>
+    </div>
+    <div class="imp-r">
+      <div class="imp-st" id="imp-st"></div>
+      <div class="imp-pv" id="imp-pv"></div>
+    </div>
+  </div>
+  <div class="m-actions"><button type="button" class="btn btn-ghost" data-close>Annuler</button><button type="button" class="btn btn-primary" id="imp-go" disabled>Importer</button></div>
+</div></div>
+
+<div class="modal hidden" id="m-item"><div class="box wide">
+  <button type="button" class="x" aria-label="Fermer">✕</button>
+  <h2 id="it-h">Ma notion</h2>
+  <div class="imp">
+    <div class="imp-l">
+      <div class="imp-meta">
+        <div><label class="lbl">Nom de la notion</label><input class="inp" id="it-title" maxlength="90"></div>
+        <div><label class="lbl">Difficulté</label><select class="inp" id="it-d"><option value="1">Facile</option><option value="2">Moyen</option><option value="3">Difficile</option></select></div>
+      </div>
+      <label class="lbl">Niveaux</label><div class="nivs" id="it-niv"></div>
+      <label class="lbl">Questions (même écriture que l’import : <code>*</code> bonne réponse, <code>=</code> saisie libre, ligne vide entre deux questions)</label>
+      <textarea class="inp imp-ta" id="it-ta" rows="12" spellcheck="false"></textarea>
+      <details class="acc sub"><summary>Valeurs aléatoires (avancé)</summary><div class="acc-b">
+        <p class="small muted">Une variable par ligne, par exemple <code>a=2..9</code> ou <code>p=5..50/5</code> (de 5 en 5). Dans les textes, écrivez <code>{a}</code> ou un calcul <code>{a*p/100}</code>. Chaque tirage donne de nouvelles valeurs.</p>
+        <textarea class="inp" id="it-vars" rows="3" spellcheck="false"></textarea>
+      </div></details>
+    </div>
+    <div class="imp-r"><div class="imp-st" id="it-st"></div><div class="imp-pv" id="it-pv"></div></div>
+  </div>
+  <div class="m-actions"><button type="button" class="btn btn-ghost" data-close>Annuler</button><button type="button" class="btn btn-primary" id="it-save">Enregistrer</button></div>
+</div></div>
+
+<div class="modal hidden" id="m-q"><div class="box">
+  <button type="button" class="x" aria-label="Fermer">✕</button>
+  <h2>Modifier la question <span id="mq-n"></span></h2>
+  <label class="lbl">Énoncé (formules entre $…$)</label>
+  <textarea class="inp" id="mq-q" rows="3"></textarea>
+  <div class="mq-type"><label class="lbl">Type</label><div class="seg" id="mq-type"></div></div>
+  <div id="mq-qcm">
+    <label class="lbl">Propositions — cochez la bonne réponse (2 à 4)</label>
+    <div id="mq-ch"></div>
+  </div>
+  <div id="mq-free" class="hidden">
+    <label class="lbl">Réponse attendue (nombre, pourcentage ou expression en x)</label>
+    <input class="inp" id="mq-ans" placeholder="ex. 4,5 · 25 % · 3x + 12">
+    <div class="small muted" id="mq-ans-st"></div>
+  </div>
+  <div id="mq-assoc" class="hidden">
+    <label class="lbl">Paires de tuiles — une par ligne : <code>gauche =&gt; droite</code> (2 à 5 paires)</label>
+    <textarea class="inp" id="mq-pairs" rows="4" placeholder="$3 \times 4$ => 12&#10;$5 \times 6$ => 30&#10;$7 \times 8$ => 56"></textarea>
+  </div>
+  <div id="mq-ordre" class="hidden">
+    <label class="lbl">Tuiles dans le BON ordre — une par ligne (3 à 6) ; elles seront mélangées pour les élèves</label>
+    <textarea class="inp" id="mq-items" rows="4" placeholder="0,05&#10;0,5&#10;0,55&#10;5"></textarea>
+    <div class="mq-row"><div><label class="lbl">Consigne (facultatif)</label><input class="inp" id="mq-how" maxlength="60" placeholder="du plus petit au plus grand"></div><div><label class="lbl">Symbole entre les tuiles</label><input class="inp" id="mq-sep" maxlength="3" placeholder="&lt;"></div></div>
+  </div>
+  <div id="mq-slider" class="hidden">
+    <div class="mq-row mq-row5">
+      <div><label class="lbl">Réponse</label><input class="inp" id="mq-sa" inputmode="decimal"></div>
+      <div><label class="lbl">Minimum</label><input class="inp" id="mq-smin" inputmode="decimal" placeholder="auto"></div>
+      <div><label class="lbl">Maximum</label><input class="inp" id="mq-smax" inputmode="decimal" placeholder="auto"></div>
+      <div><label class="lbl">Tolérance ±</label><input class="inp" id="mq-stol" inputmode="decimal" placeholder="auto"></div>
+      <div><label class="lbl">Unité</label><input class="inp" id="mq-su" maxlength="8"></div>
+    </div>
+    <div class="small muted">Zone verte = réponse ± tolérance (tous les points). Zone orange = ± 2,5 × tolérance (la moitié des points). Laissez « auto » : les bornes sont choisies pour que la réponse ne soit ni au milieu ni au bord.</div>
+  </div>
+  <div class="mq-row">
+    <div><label class="lbl">Temps</label><select class="inp" id="mq-dur"></select></div>
+  </div>
+  <label class="lbl">Explication affichée à la correction</label>
+  <textarea class="inp" id="mq-x" rows="2"></textarea>
+  <div class="mq-pv card" id="mq-pv"></div>
+  <div class="m-actions"><button type="button" class="btn btn-ghost" data-close>Annuler</button><button type="button" class="btn btn-primary" id="mq-save">Valider</button></div>
+</div></div>
+
+<div class="modal hidden" id="m-mine"><div class="box">
+  <button type="button" class="x" aria-label="Fermer">✕</button>
+  <h2>Mes questions</h2>
+  <div id="mine-list"></div>
+  <div class="m-actions left">
+    <button type="button" class="btn btn-soft" id="mine-imp"></button>
+    <button type="button" class="btn btn-soft" id="mine-exp">Exporter (sauvegarde .json)</button>
+    <label class="btn btn-soft">Restaurer une sauvegarde<input type="file" id="mine-file" accept=".json,application/json" hidden></label>
+    <button type="button" class="btn btn-ghost" id="mine-unhide"></button>
+  </div>
+</div></div>
+
+<div class="modal hidden" id="m-players"><div class="box wide">
+  <button type="button" class="x" aria-label="Fermer">✕</button>
+  <h2>Joueurs de la salle <span id="mp-code"></span></h2>
+  <div class="mp-top">
+    <div class="mp-late"><div class="mp-qr" id="mp-qr"></div><div><b>Un retardataire ?</b><br><span class="muted small">Il scanne le QR code ou tape le code sur la page élève ; il rejoint la partie à la question en cours.</span><div class="mp-code" id="mp-code2"></div></div></div>
+    <div class="mp-host hidden" id="mp-host"></div>
+  </div>
+  <div id="mp-list"></div>
+</div></div>
+
+<div class="qrfull hidden" id="m-qrbig" role="dialog" aria-label="QR code en plein écran">
+  <button type="button" class="qf-x" id="qf-x" aria-label="Fermer">✕ Fermer</button>
+  <div class="qf-in">
+    <div class="qf-qr" id="qf-qr"></div>
+    <div class="qf-side">
+      <div class="qf-l">Scannez le QR code<br>ou allez sur</div>
+      <div class="qf-url" id="qf-url"></div>
+      <div class="qf-l">avec le code</div>
+      <div class="qf-code" id="qf-code"></div>
+      <div class="qf-n" id="qf-n"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal hidden" id="m-ans"><div class="box wide">
+  <button type="button" class="x" aria-label="Fermer">✕</button>
+  <h2 id="ma-h">Réponses de chaque joueur</h2>
+  <div class="ma-q" id="ma-q"></div>
+  <div id="ma-list"></div>
+</div></div>
+
+<div class="modal hidden" id="m-hostcode"><div class="box">
+  <button type="button" class="x" aria-label="Fermer">✕</button>
+  <h2>Votre code prof</h2>
+  <p class="muted">Sur votre téléphone, ouvrez la page élève et tapez ce code : vous jouez contre la classe. Fermez cette fenêtre avant de projeter.</p>
+  <div class="hc-code" id="hc-code">····</div>
+  <p class="small muted center" id="hc-t">Masqué automatiquement dans 10 s.</p>
+</div></div>
+
+<div class="modal hidden" id="m-hist"><div class="box wide">
+  <button type="button" class="x" aria-label="Fermer">✕</button>
+  <h2>Historique des parties</h2>
+  <div class="seg" id="h-tabs"><button type="button" data-h="local" class="on">Sur cet ordinateur</button><button type="button" data-h="db">En ligne (30 jours)</button></div>
+  <div id="h-body"></div>
+</div></div>
+
+<div class="modal hidden" id="m-diag"><div class="box">
+  <button type="button" class="x" aria-label="Fermer">✕</button>
+  <h2>Diagnostic de la base</h2>
+  <div id="diag-body"></div>
+  <div class="m-actions"><button type="button" class="btn btn-primary" id="diag-run">Relancer le test</button></div>
+</div></div>
+
+<div class="modal hidden" id="m-help"><div class="box">
+  <button type="button" class="x" aria-label="Fermer">✕</button>
+  <h2>Aide rapide</h2>
+  <ol class="help">
+    <li><b>Choisir</b> : le mode de jeu, un niveau, puis des notions (ou « Surprends-moi »).</li>
+    <li><b>Générer</b> : vérifiez les questions (réponses masquées tant que vous ne cochez pas « Afficher les réponses »). Cliquez sur un texte pour le modifier, glissez pour réordonner.</li>
+    <li><b>Ouvrir la salle</b> : les élèves vont sur la page élève, tapent le code et leur prénom (30 élèves maximum).</li>
+    <li><b>Duel</b> : chaque élève glisse son jeton dans une équipe ; vous pouvez renommer les équipes et déplacer les élèves.</li>
+    <li><b>Classe VS Prof</b> : « Afficher le code prof » donne le code à taper sur votre téléphone pour jouer contre la classe.</li>
+    <li><b>Jouer</b> : les règles s’affichent, puis les questions. « Joueurs » permet de renommer, d’exclure ou de faire entrer un retardataire (QR code). « +30 s » rallonge, « Écourter » passe au podium.</li>
+  </ol>
+  <p class="muted small">Plusieurs salles peuvent être ouvertes en même temps sur des ordinateurs différents : chaque salle a son propre code.</p>
+</div></div>
+
+<script type="application/json" id="fm-cours">/*@@COURS@@*/</script>
+<script>/*@@KATEXJS@@*/</script>
+<script>/*@@SUPABASE@@*/</script>
+<script>/*@@QRJS@@*/</script>
+<script src="config.js"></script>
+<script>
+/*@@COMMONJS@@*/
+/*@@FXJS@@*/
+/*@@BANK@@*/
+/*@@CUSTOM@@*/
+/*@@PROFJS@@*/
+</script>
+</body>
+</html>

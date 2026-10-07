@@ -1,0 +1,18 @@
+const fs=require('fs'),path=require('path');
+const src=['bank_core.js','bank_items_a.js','bank_items_b.js','bank_items_c.js','bank_items_d.js','bank_items_e.js','bank_items_f.js','bank_curriculum.js','bank_engine.js'].map(f=>fs.readFileSync(path.join(__dirname,'../src',f),'utf8')).join('\n').replace(/"use strict";/g,'');
+const tmp=path.join(__dirname,'../src/_b.js');fs.writeFileSync(tmp,src);const B=require(tmp);fs.unlinkSync(tmp);
+const T=(q,s)=>{const r=B.checkTyped(q,s);return (r.valid?(r.ok?'OK ':'non'):'invalide')+'  '+s;};
+let q={num:4.5,unit:'',dec:2,choices:[{t:'4,5'}],ans:0};
+['4,50','450%','4.5000','4,5','9/2','4,6','45','4,5 cm','abc',''].forEach(s=>console.log(T(q,s)));
+q={num:25,unit:'%',dec:2,choices:[{t:'25 %'}],ans:0};
+console.log('-- 25 %');['25','25%','0,25','2,5','250%'].forEach(s=>console.log(T(q,s)));
+q={num:113.04,unit:'cm³',dec:2,choices:[{t:'113,04 cm³'}],ans:0};
+console.log('-- 113,04');['113,04','113.04 cm³','113','113,0'].forEach(s=>console.log(T(q,s)));
+q={num:1/3,unit:'',dec:3,choices:[{t:'0,333'}],ans:0};
+console.log('-- 1/3 (affiché 0,333)');['0,333','1/3','0,33','0,3333'].forEach(s=>console.log(T(q,s)));
+q={lit:'(3)*x+(12)',form:'dev',choices:[{t:'$3x + 12$'},{t:'$3x + 4$'}],ans:0};
+console.log('-- dev 3(x+4)');['3x+12','12+3x','3(x+4)','3x+4','3*x+12','x3+12','3x+12+0x'].forEach(s=>console.log(T(q,s)));
+q={lit:'5*(x+(3))',form:'fact',choices:[{t:'$5(x + 3)$'}],ans:0};
+console.log('-- fact 5x+15');['5(x+3)','(x+3)5','5x+15','5(3+x)','(5x+15)','5(x+3)(1)'].forEach(s=>console.log(T(q,s)));
+q={lit:'(2)*x+(-3)',form:'red',choices:[{t:'$2x - 3$'}],ans:0};
+console.log('-- red');['2x-3','-3+2x','2x−3','x+x-3','2x+-3'].forEach(s=>console.log(T(q,s)));

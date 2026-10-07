@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Flash Maths : questions flash de mathématiques en direct pour la classe (CAP, Bac Pro, 3e Prépa-Métiers).">
+<meta name="theme-color" content="#5B55C4">
+<title>Flash Maths</title>
+<!--@@FAVICON@@-->
+<style>
+/*@@THEMECSS@@*/
+.wrap{max-width:62rem;margin:0 auto;padding:1rem}
+.hero{text-align:center;padding:2.2rem 1rem 1.4rem}
+.hero .lg{width:7.5rem;height:7.5rem;margin:0 auto .6rem;animation:floaty 3s ease-in-out infinite}
+.hero .lg svg,.hero .lg img{width:100%;height:100%;display:block}
+.hero h1{font-size:clamp(2.6rem,8vw,4.4rem);letter-spacing:-.03em}
+.hero h1 b{color:var(--violet)}.hero h1 i{font-style:normal;color:var(--coral)}
+.hero p{font-size:1.15rem;color:var(--ink2);max-width:40rem;margin:.6rem auto 0}
+.doors{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin:1.4rem 0}
+@media (max-width:640px){.doors{grid-template-columns:1fr}}
+.door{display:block;text-decoration:none;color:#fff;border-radius:26px;padding:1.6rem 1.5rem;box-shadow:var(--sh);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden;border:2px solid transparent}
+.door:hover{transform:translateY(-3px);box-shadow:var(--sh-lg)}
+.door:active{transform:translateY(2px)}
+.door h2{font-size:2rem;margin:.4rem 0 .3rem}
+.door p{margin:0;font-weight:700;opacity:.92}
+.door .ic{width:3.4rem;height:3.4rem;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.door .ic svg{width:2rem;height:2rem}
+.door .go{display:inline-flex;margin-top:1rem;border-radius:999px;padding:.55rem 1.1rem;font-weight:900}
+.door.prof{background:var(--ink)}.door.prof .ic{background:rgba(246,196,83,.18);color:var(--bulb)}.door.prof .go{background:var(--bulb);color:var(--ink)}
+.door.eleve{background:#fff;color:var(--ink);border-color:var(--line)}.door.eleve p{color:var(--ink2);opacity:1}.door.eleve .ic{background:var(--sun-l);color:#C47A2C}.door.eleve .go{background:var(--ink);color:#fff}
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0 1.6rem}
+@media (max-width:760px){.feats{grid-template-columns:1fr}}
+.feat{background:#fff;border-radius:22px;box-shadow:var(--sh);padding:1rem 1.1rem}
+.feat b{display:block;font-size:1.05rem;margin-bottom:.2rem}
+.feat span{color:var(--ink2);font-size:.92rem}
+.apropos h2{font-size:1.5rem;margin-bottom:.6rem}
+.apropos h3{font-size:1.1rem;margin:1rem 0 .3rem}
+.apropos p,.apropos li{color:var(--ink2);font-weight:600}
+.apropos ul{padding-left:1.2rem}
+</style>
+</head>
+<body>
+<header class="top"><span id="brand"></span><span class="sp"></span><div class="tools"><div class="zoom" id="zoom"></div></div></header>
+<main class="wrap">
+  <section class="hero">
+    <div class="lg" id="biglogo"></div>
+    <h1><b>Flash</b> <i>Maths</i></h1>
+    <p>Des questions flash de mathématiques, en direct au tableau et sur les téléphones : automatismes, cours et calcul, pour le CAP, le Bac Pro et la 3ᵉ Prépa-Métiers.</p>
+  </section>
+  <div class="doors">
+    <a class="door prof" href="prof.html"><span class="ic" id="ic-prof"></span><h2>Je suis prof</h2><p>Je choisis les notions, je vérifie les questions et j’ouvre une salle pour ma classe.</p><span class="go">Espace prof →</span></a>
+    <a class="door eleve" href="eleve.html"><span class="ic" id="ic-eleve"></span><h2>Je suis élève</h2><p>Je tape le code affiché au tableau, je donne mon prénom et je joue !</p><span class="go">Rejoindre une partie →</span></a>
+  </div>
+  <div class="feats">
+    <div class="feat"><b>3 modes de jeu</b><span>Un contre tous, Duel d’équipes, La Classe VS le Prof.</span></div>
+    <div class="feat"><b>Questions variées</b><span>QCM, Vrai/Faux, saisie libre, tuiles à associer, remise en ordre, estimation au curseur, étape fausse à trouver, figures.</span></div>
+    <div class="feat"><b>Respect des élèves</b><span>Prénom ou pseudo, aucun compte, aucune publicité, aucun traceur.</span></div>
+  </div>
+
+  <section class="card apropos" id="apropos">
+    <h2>À propos</h2>
+    <p>Flash Maths est un outil pédagogique libre conçu par un enseignant de mathématiques-sciences en lycée professionnel. Il sert à faire travailler les automatismes en début de séance, à réviser une notion ou à vérifier des acquis, en quelques minutes.</p>
+    <h3>Choix de conception</h3>
+    <ul>
+      <li>Des pages web autonomes : polices, formules (KaTeX) et bibliothèques sont intégrées, aucun appel à un site extérieur hormis la base de données de l’enseignant.</li>
+      <li>Une base de données Supabase, choisie et gérée par l’enseignant, pour les salles en direct (30 élèves au maximum par salle, plusieurs salles possibles en même temps) et un historique des parties gardé 30 jours.</li>
+      <li>Les questions sont tirées de familles à paramètres aléatoires (plusieurs « angles » par notion), avec des réponses fausses qui correspondent à des erreurs types. En fin de partie, le prof voit les erreurs les plus fréquentes et la réussite par notion.</li>
+      <li>Les réponses libres sont acceptées sous toutes leurs formes équivalentes : 4,5 = 4,50 = 450 % = 9/2 ; 3x + 2 = 2 + 3x.</li>
+    </ul>
+    <h3>Limites connues</h3>
+    <ul>
+      <li>Le jeu en salle demande une connexion Internet ; l’entraînement élève fonctionne hors ligne.</li>
+      <li>Les prénoms ne sont pas vérifiés : le prof peut renommer ou retirer un élève à tout moment.</li>
+      <li>Les questions personnelles du prof et le carnet de l’élève restent dans le navigateur de l’appareil utilisé (export / import possible).</li>
+      <li>Les listes de notions doivent être vérifiées au regard des programmes officiels en vigueur ; l’éditeur permet de les compléter.</li>
+    </ul>
+  </section>
+  <div id="foot"></div>
+</main>
+<script>
+/*@@COMMONJS@@*/
+$("brand").outerHTML=brandHtml("","index.html");
+$("biglogo").innerHTML=logoSvg();
+$("ic-prof").innerHTML=ICO.users;$("ic-eleve").innerHTML=ICO.rocket;
+$("foot").innerHTML=footHtml();
+initZoom("index",$("zoom"));
+</script>
+</body>
+</html>
