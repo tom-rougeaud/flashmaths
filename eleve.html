@@ -38,13 +38,13 @@
   --fz:1;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{font-size:calc(16px * var(--fz) * var(--fit,1));-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{font-size:calc(16px * var(--fz) * var(--fit,1) * var(--dz,1));-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{margin:0;min-height:100%}
 body{font-family:var(--f);font-weight:600;color:var(--ink);line-height:1.4;background-color:var(--bg);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;background-attachment:fixed;font-variant-numeric:tabular-nums}
 h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.01em;line-height:1.15}
 a{color:var(--violet-d)}
-button,input,select,textarea{font-family:inherit;font-weight:700;color:inherit}
+button,input,select,textarea{font-family:inherit;font-weight:700;color:inherit;font-size:.84rem}
 button{cursor:pointer}
 .hidden{display:none!important}
 .muted{color:var(--ink2)}
@@ -230,6 +230,22 @@ canvas.fx-confetti{position:fixed;top:0;right:0;bottom:0;left:0;width:100%;heigh
   .ibtn{height:2.1rem;min-width:2.1rem;padding:0 .5rem}
   .top .tools{gap:.3rem;flex-wrap:nowrap}
 }
+/* même réglage quand un téléphone affiche la page en « version ordinateur » (classe posée par dzCalc) */
+html.narrow .top{gap:.35rem;padding:.45rem .55rem;flex-wrap:nowrap}
+html.narrow #brand{min-width:0;overflow:hidden;flex:0 1 auto}html.narrow .top .tools{flex:none}
+html.narrow .brand{font-size:1rem;gap:.3rem}html.narrow .brand svg{width:1.7rem;height:1.7rem}html.narrow .brand small{display:none}
+html.narrow .zoom span{display:none}html.narrow .zoom button{min-width:1.9rem;height:1.9rem;font-size:.85rem}
+html.narrow .vsw button{padding:.3rem .55rem;font-size:.75rem}
+html.narrow .ibtn{height:2.1rem;min-width:2.1rem;padding:0 .5rem}
+html.narrow .top .tools{gap:.3rem;flex-wrap:nowrap}
+/* formules : jamais coupées au milieu d’un nombre ; sur les écrans ajustés, d’un seul tenant */
+.katex,.katex *{overflow-wrap:normal;word-break:normal}
+.nw{white-space:nowrap}
+body.kwrap .nw{white-space:normal}
+body.fit:not(.kwrap) .katex{white-space:nowrap}
+/* écran ajusté : l’en-tête garde sa taille, la page n’impose plus de hauteur minimale */
+body.fit #app{min-height:0}
+body.fit .top,body.fit #foot{zoom:var(--tz,1)}
 
 
 /* ═══ FORMATS DE QUESTIONS (commun prof / élève) ═══ */
@@ -351,7 +367,7 @@ body.v-mob .rocket{width:3.8rem}
 #app{max-width:34rem;margin:0 auto;padding:.9rem .9rem 2rem;min-height:calc(100vh - 4rem);min-height:calc(100dvh - 4rem)}
 body.v-pc #app{max-width:62rem;padding:1.4rem 1.4rem 3rem}
 .top .brand small{display:none}
-@media (min-width:420px){.top .brand small{display:inline}}
+@media (min-width:420px){html:not(.narrow) .top .brand small{display:inline}}
 .screen{animation:fade .25s}
 .center{text-align:center}
 .big-t{font-size:1.65rem;text-align:center;margin:.6rem 0 1rem}
@@ -582,7 +598,16 @@ body.ingame .sent{position:fixed;left:50%;bottom:max(.8rem,env(safe-area-inset-b
 body.ingame .q-card{margin-bottom:.6rem}
 body.ingame .fig{max-width:min(100%,34rem)}
 
-body.ingame .top{zoom:calc(1 / var(--fit,1))}
+/* v3.6 : la place restante en bas de l’écran sert aux réponses (plus hautes) */
+body.fit #q-ans,body.fit #kpad{align-content:stretch;grid-auto-rows:1fr}
+/* v3.6 : sur un écran large (vue PC), la figure se place à droite de l’énoncé */
+body.v-pc .q-txt.hasfig{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,46%);gap:1.2rem;align-items:center}
+body.v-pc .q-txt.hasfig .fig{margin:0;max-width:none}
+body.v-pc .q-txt.hasfig .figsvg{max-height:14rem}
+body.v-pc .q-txt{font-size:1.55rem}
+/* écran ajusté : les réponses partent d’une hauteur réduite, la place restante les agrandit ensuite */
+body.fit .ab{min-height:3.8rem}
+body.fit.v-pc .ab{min-height:4.4rem}
 
 </style>
 </head>
@@ -732,7 +757,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
    Les textes français utilisent l’apostrophe typographique ’.
 ═══════════════════════════════════════════════════════════════ */
 "use strict";
-var FM_VERSION="3.5";
+var FM_VERSION="3.6";
 function $(id){return document.getElementById(id);}
 function $$(sel,root){return [].slice.call((root||document).querySelectorAll(sel));}
 function esc(s){return String(s===undefined||s===null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -846,6 +871,7 @@ function rulesHtml(mode,o){
   var com=RULES.common.slice();
   if(o.sm==="juste")com[0]=["check","1 000 points par bonne réponse, quelle que soit la vitesse : prends le temps de bien réfléchir."];
   if(o.rd>0)com.splice(1,0,["eye","Les propositions apparaissent après "+o.rd+" secondes : lis bien l’énoncé d’abord."]);
+  if(typeof o.fk==="string"){var keep={keyb:"k",tiles:"t",target:"e"};com=com.filter(function(r){return !keep[r[0]]||o.fk.indexOf(keep[r[0]])>=0;});}
   var R=RULES[mode].slice();
   if(mode==="boss"){
     if(o.hd>0)R.splice(R.length-1,0,["clock","Handicap du prof : la question s’affiche sur son téléphone "+o.hd+" s après les vôtres."]);
@@ -895,32 +921,88 @@ function initZoom(key,host){
    Les figures (SVG à viewBox) et tous les blocs étant en rem, tout grandit ou rétrécit ensemble,
    sans déformation. Le zoom A− / A+ règle la taille maximale autorisée. */
 var FIT={on:false,min:0.6,max:1.9,base:1.9,T:null,busy:false};
-function fitSet(f){document.documentElement.style.setProperty("--fit",String(Math.round(f*1000)/1000));}
+/* Téléphone affiché en « version ordinateur » (Chrome « Site pour ordinateur », certains navigateurs intégrés) :
+   la page est mise en page sur ~980 px puis réduite, tout devient minuscule. On compense par --dz. */
+var DZ=1,COARSE=false;try{COARSE=window.matchMedia("(pointer:coarse)").matches;}catch(e){}
+function dzCalc(){
+  var d=document.documentElement,cw=d.clientWidth||window.innerWidth,sw=screen.width||cw,sh=screen.height||cw,coarse=false;
+  try{coarse=window.matchMedia("(pointer:coarse)").matches;}catch(e){}
+  var dev=window.innerWidth>window.innerHeight?Math.max(sw,sh):Math.min(sw,sh),z=1;
+  if(coarse&&dev>0&&dev<1100&&cw>dev*1.3)z=Math.min(3.2,cw/dev);
+  DZ=z;d.style.setProperty("--dz",String(Math.round(z*1000)/1000));
+  d.classList.toggle("narrow",cw/z<=480);d.classList.toggle("dzon",z>1);
+}
+dzCalc();
+function fitSet(f){var d=document.documentElement.style;d.setProperty("--fit",String(Math.round(f*1000)/1000));d.setProperty("--tz",String(f>1?Math.round(1000/f)/1000:1));}
+function visible(e){return !!(e&&e.getClientRects().length);}
+/* une formule (KaTeX) dépasse-t-elle du bloc qui la contient (ou de l’écran) ? */
+function fitKatexCut(){
+  var ks=document.querySelectorAll(".katex"),W=document.documentElement.clientWidth;
+  for(var i=0;i<ks.length;i++){
+    var k=ks[i];if(!visible(k))continue;var r=k.getBoundingClientRect();if(!r.width)continue;
+    if(r.right>W+1||r.left<-1)return true;
+    var c=k.parentElement;
+    while(c&&c!==document.body){var cs=getComputedStyle(c);if(cs.display.indexOf("inline")!==0)break;c=c.parentElement;}
+    if(c&&c!==document.body){var cr=c.getBoundingClientRect();if(r.right>cr.right+2||r.left<cr.left-2)return true;}
+  }
+  return false;
+}
 function fitOverflows(){
   var d=document.documentElement,b=document.body,h=window.innerHeight,w=d.clientWidth||window.innerWidth;
-  return Math.max(d.scrollHeight,b.scrollHeight)>h+1||Math.max(d.scrollWidth,b.scrollWidth)>w+1;
+  if(Math.max(d.scrollHeight,b.scrollHeight)>h+1||Math.max(d.scrollWidth,b.scrollWidth)>w+1)return true;
+  var xs=document.querySelectorAll("[data-fit]");
+  for(var i=0;i<xs.length;i++){var e=xs[i];if(visible(e)&&(e.scrollHeight>e.clientHeight+1||e.scrollWidth>e.clientWidth+1))return true;}
+  return fitKatexCut();
 }
-function fitNow(){
-  clearTimeout(FIT.T);
-  if(!FIT.on){fitSet(1);return;}
-  if(FIT.busy)return;FIT.busy=true;
-  var lo=FIT.min,hi=Math.max(FIT.min,FIT.max),best=lo,sy=window.scrollY;
+function fitSearch(){
+  var lo=FIT.min,hi=Math.max(FIT.min,FIT.max),best=lo;
   fitSet(hi);
   if(!fitOverflows())best=hi;
   else for(var i=0;i<9;i++){var mid=(lo+hi)/2;fitSet(mid);if(fitOverflows())hi=mid;else{lo=mid;best=mid;}}
-  fitSet(best*0.985);window.scrollTo(0,sy);FIT.busy=false;
+  fitSet(best*0.985);return best;
+}
+function fitNow(){
+  clearTimeout(FIT.T);
+  var b=document.body;
+  if(!FIT.on){fitSet(1);b.classList.remove("fit","kwrap");return;}
+  if(FIT.busy)return;FIT.busy=true;
+  var sy=window.scrollY;b.classList.add("fit");b.classList.remove("kwrap");
+  if(FIT.unfill)FIT.unfill();
+  if(FIT.pre)FIT.pre();
+  var A=fitSearch();
+  /* formule longue : si la garder d’un seul tenant oblige à trop réduire (ou si elle dépasse encore),
+     on autorise la coupure aux signes = + − × (jamais au milieu d’un nombre) */
+  if(fitKatexCut()){b.classList.add("kwrap");fitSearch();}
+  else if(A<FIT.max*0.95&&[].some.call(document.querySelectorAll(".katex"),visible)){
+    b.classList.add("kwrap");var K=fitSearch();
+    if(A>=K*0.8){b.classList.remove("kwrap");fitSet(A*0.985);if(fitOverflows())fitSearch();}
+  }
+  /* place restante en bas : la page la répartit (réponses plus hautes, contenu centré) */
+  if(FIT.fill){var mn=document.querySelector("main")||b,gap=window.innerHeight-(mn.getBoundingClientRect().bottom+parseFloat(getComputedStyle(mn).marginBottom||0));if(gap>8){FIT.fill(gap-6);if(fitOverflows()&&FIT.unfill)FIT.unfill();}}
+  window.scrollTo(0,sy);FIT.busy=false;
 }
 function fitSoon(ms){clearTimeout(FIT.T);FIT.T=setTimeout(fitNow,ms===undefined?30:ms);clearTimeout(FIT.T2);FIT.T2=setTimeout(function(){if(FIT.on)fitNow();},850);}
-/* on = écran de jeu affiché ; o = {min, max} */
+/* on = écran ajusté ; o = {min, max} */
 function fitScreen(on,o){
   FIT.on=!!on;if(o){if(o.min)FIT.min=o.min;if(o.max)FIT.base=o.max;}
   var z=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--fz"))||1;FIT.max=FIT.base*z;
-  if(!on){fitSet(1);return;}
+  if(!on){fitSet(1);document.body.classList.remove("fit","kwrap");return;}
   fitNow();fitSoon(250);
   clearTimeout(FIT.T2);FIT.T2=setTimeout(function(){if(FIT.on)fitNow();},850);   /* après les animations (secousse, apparition) */
 }
-window.addEventListener("resize",function(){if(FIT.on)fitSoon(120);});
-window.addEventListener("orientationchange",function(){if(FIT.on)fitSoon(300);});
+/* le contenu d’un écran change (élève qui arrive, correction, liste…) : on réajuste ; les simples changements de texte (chrono) sont ignorés */
+function fitWatch(root){
+  if(!root||!window.MutationObserver)return;
+  new MutationObserver(function(ms){
+    if(!FIT.on||FIT.busy)return;
+    for(var i=0;i<ms.length;i++){var m=ms[i],n=[].slice.call(m.addedNodes).concat([].slice.call(m.removedNodes));
+      for(var j=0;j<n.length;j++)if(n[j].nodeType===1){fitSoon(60);return;}
+      if(m.type==="attributes"&&m.attributeName==="class"&&/(^| )hidden( |$)/.test(String(m.oldValue||""))!==m.target.classList.contains("hidden")){fitSoon(60);return;}}
+  }).observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:["class"],attributeOldValue:true});
+}
+function typing(){var a=document.activeElement;return !!(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=="checkbox"&&a.type!=="radio"&&a.type!=="range");}
+window.addEventListener("resize",function(){dzCalc();if(FIT.on&&!(typing()&&COARSE))fitSoon(120);});
+window.addEventListener("orientationchange",function(){setTimeout(dzCalc,200);if(FIT.on)fitSoon(300);});
 try{if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(FIT.on)fitSoon(0);});}catch(e){}
 
 /* ─── Fenêtres, messages ─── */
@@ -986,7 +1068,11 @@ function rt(s){
     else{
       var html=null;
       try{if(window.katex)html=katex.renderToString(parts[i].replace(/(\d),(\d)/g,"$1{,}$2"),{throwOnError:false,strict:"ignore",trust:false});}catch(e){html=null;}
-      out+=html||('<span class="tex">'+esc(parts[i])+"</span>");
+      html=html||('<span class="tex">'+esc(parts[i])+"</span>");
+      /* la ponctuation qui suit une formule reste collée à elle (jamais seule en début de ligne) */
+      var pm=i+1<parts.length&&/^[ \u00a0\u202f]?[.,;:!?)»…]+/.exec(parts[i+1]);
+      if(pm){out+='<span class="nw">'+html+esc(pm[0].replace(/^ /,"\u00a0"))+"</span>";parts[i+1]=parts[i+1].slice(pm[0].length);}
+      else out+=html;
     }
   }
   RT_CACHE[s]=out;return out;
@@ -1597,6 +1683,7 @@ function QX(r,intro,steps,bad,expl,o){
    aucune balise n’est transmise sur le réseau, seulement la description de la figure)
 ═══════════════════════════════════════════════════════════════ */
 var FIGC={v:"#5B55C4",c:"#D9606A",s:"#D59A2E",m:"#2E9E7E",k:"#4A86CF",ink:"#262A4F",g:"#E4E1F7",l:"#EEEBFF"};
+var FIG_N=0;
 var FIG_PAL=["#5B55C4","#D9606A","#D59A2E","#2E9E7E","#4A86CF","#C95B82"];
 function xe(s){return String(s===undefined||s===null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").slice(0,40);}
 function fnum(v){return typeof v==="number"&&isFinite(v)?v:0;}
@@ -1682,7 +1769,8 @@ function figHtml(fig){
       for(var a2=Math.ceil(xr[0]/stx)*stx;a2<=xr[1]+1e-9;a2+=stx){if(Math.abs(a2-x0)<1e-9&&x0===0)continue;if(x0===0&&y0===0&&Math.abs(a2+stx)<1e-9&&stx*sx<30)continue;if(fig.lx===false)break;if(Math.round(a2/stx)%(fig.ex||1)===0)b+=figT(gx(a2),Math.min(oy+GH+12,gy(y0)+12),f(a2,2),{fs:11,fw:700,halo:1});}
       for(var b2=Math.ceil(yr[0]/sty)*sty;b2<=yr[1]+1e-9;b2+=sty){if(Math.abs(b2-y0)<1e-9&&y0===0)continue;if(x0===0&&y0===0&&Math.abs(b2+sty)<1e-9&&sty*sy<24)continue;if(fig.ly===false)break;if(Math.round(b2/sty)%(fig.ey||1)===0)b+=figT(gx(x0)-7,gy(b2),f(b2,2),{fs:11,fw:700,a:"end",halo:1});}
       if(x0===0&&y0===0)b+=figT(gx(0)-8,Math.min(oy+GH+12,gy(0)+11),"0",{fs:11,fw:700,halo:1});var labs=b.slice(bl);b=b.slice(0,bl);
-      b+='<clipPath id="fgclip"><rect x="'+(ox-2)+'" y="'+(oy-2)+'" width="'+(GW+4)+'" height="'+(GH+4)+'"/></clipPath><g clip-path="url(#fgclip)">';
+      var cid="fgc"+(++FIG_N);   /* identifiant unique : plusieurs repères peuvent cohabiter dans la page */
+      b+='<clipPath id="'+cid+'"><rect x="'+(ox-2)+'" y="'+(oy-2)+'" width="'+(GW+4)+'" height="'+(GH+4)+'"/></clipPath><g clip-path="url(#'+cid+')">';
       (fig.curves||(fig.pts?[fig.pts]:[])).forEach(function(cv,ci){
         var d=cv.map(function(p,pi){return (pi?"L":"M")+rd(gx(p[0]),1)+" "+rd(gy(p[1]),1);}).join("");
         b+='<path d="'+d+'" fill="none" stroke="'+FIG_PAL[ci===0?0:1+ci%5]+'" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>';
@@ -4761,12 +4849,24 @@ function importProg(file,cb){
 ═══════════════════════════════════════════════════════════════ */
 var S={code:"",pid:null,pseudo:"",ch:null,mode:null,phase:null,team:-1,score:0,lb:null,q:null,ans:null,ping:null,timer:null,train:null};
 var SCREENS=["s-code","s-pseudo","s-lobby","s-cd","s-q","s-rv","s-end","s-train","s-carnet"];
-function show(id){SCREENS.forEach(function(s){$(s).classList.toggle("hidden",s!==id);});var g=/^s-(q|rv|cd)$/.test(id);document.body.classList.toggle("ingame",g);window.scrollTo(0,0);S.screen=id;fitScreen(g,{min:0.6,max:document.body.classList.contains("v-pc")?2.1:1.8});}
+function show(id){SCREENS.forEach(function(s){$(s).classList.toggle("hidden",s!==id);});var g=/^s-(q|rv|cd)$/.test(id);document.body.classList.toggle("ingame",g);window.scrollTo(0,0);S.screen=id;fitView();}
+/* répartition de la place restante (après l’ajustement de la taille) */
+FIT.unfill=function(){$$("#app .screen").forEach(function(e){e.style.paddingTop="";});["q-ans","kpad","q-wid"].forEach(function(id){var e=$(id);if(e)e.style.minHeight="";});};
+FIT.fill=function(gap){
+  var sc=S.screen&&$(S.screen);if(!sc)return;
+  if(S.screen==="s-q"){
+    var grow=["q-ans","kpad","q-wid"].map($).filter(function(e){return e&&visible(e)&&e.children.length&&!e.closest(".hidden");})[0];
+    if(grow){grow.style.minHeight=(grow.getBoundingClientRect().height+Math.min(gap,window.innerHeight*0.4))+"px";return;}
+  }
+  sc.style.paddingTop=Math.round(gap*0.42)+"px";
+};
+/* tous les écrans s’ajustent à la fenêtre (sauf le carnet, une longue liste) ; les écrans de jeu peuvent rétrécir davantage */
+function fitView(){if(typeof S==="undefined"||!S.screen)return;var id=S.screen,pc=document.body.classList.contains("v-pc"),g=/^s-(q|rv|cd)$/.test(id);fitScreen(id!=="s-carnet",g?{min:0.6,max:pc?2.1:1.8}:{min:id==="s-end"?0.6:0.7,max:pc?1.6:1.7});}
 var PREF={view:"mob",sound:false};
 function savePref(){store.set("eleve",PREF);}
 
 /* ─── en-tête ─── */
-function setView(v){PREF.view=v;savePref();document.body.classList.remove("v-mob","v-pc");document.body.classList.add("v-"+v);$$("#vsw button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-v")===v);});if(FIT.on)fitScreen(true,{max:v==="pc"?2.1:1.8});}
+function setView(v){PREF.view=v;savePref();document.body.classList.remove("v-mob","v-pc");document.body.classList.add("v-"+v);$$("#vsw button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-v")===v);});fitView();}
 $("vsw").addEventListener("click",function(e){var b=e.target.closest("button");if(b)setView(b.getAttribute("data-v"));});
 $("b-menu").addEventListener("click",function(e){e.stopPropagation();$("menu").classList.toggle("hidden");});
 document.addEventListener("click",function(e){if(!e.target.closest(".menu-w"))$("menu").classList.add("hidden");});
@@ -4935,7 +5035,7 @@ function onMsg(m){
     case "en":showEnd(m);break;
     case "kick":kicked(m.why==="host"?"Un autre téléphone prof a pris la main.":"Le prof t’a retiré de la salle.");break;
     case "rn":S.pseudo=m.p;var ss=store.get("sess",null);if(ss){ss.pseudo=m.p;store.set("sess",ss);}store.set("pseudo",m.p);toast("Le prof a changé ton nom : « "+m.p+" ».");if(S.screen==="s-lobby")renderLobby();break;
-    case "ru":S.phase="lobby";showRulesCard(m.m,{sm:m.sm,rd:m.rd,hd:m.hd,hpen:m.hpen});break;
+    case "ru":S.phase="lobby";showRulesCard(m.m,{sm:m.sm,rd:m.rd,hd:m.hd,hpen:m.hpen,fk:m.fk});break;
     case "no":
       if(m.why==="full"){kicked(JOIN_ERR.full);}
       else if(m.why==="pseudo"){leaveRoom(true);gotoPseudo();psErr(JOIN_ERR.pseudo_taken);}
@@ -5007,7 +5107,8 @@ function showQuestion(q,done){
   $("q-n").textContent=(q.i+1)+" / "+q.N;
   $("q-sc").textContent=fmtInt(S.score)+" pts";
   $("q-tag").innerHTML=pubTag(q);
-  $("q-txt").innerHTML=rt(q.q)+figBlock(q.fig);
+  $("q-txt").innerHTML='<div class="q-st">'+rt(q.q)+"</div>"+figBlock(q.fig);
+  $("q-txt").classList.toggle("hasfig",!!q.fig&&!!figHtml(q.fig));
   $("q-sent").classList.add("hidden");$("q-sent").classList.remove("late");
   $("q-wid").classList.add("hidden");$("q-wid").classList.remove("off");
   if(kd==="assoc"||kd==="ordre"||kd==="slider"){
@@ -5018,8 +5119,10 @@ function showQuestion(q,done){
     buildPad(q.kb);$("f-unit").textContent=q.u||"";$("f-in").value="";renderTyped();$("f-in").readOnly=false;if(!isTouch())setTimeout(function(){try{$("f-in").focus({preventScroll:true});}catch(x){$("f-in").focus();}},60);
   }else{
     $("q-free").classList.add("hidden");var a=$("q-ans");a.classList.remove("hidden","off");
-    var long=q.ch.some(function(c){return c.replace(/\$[^$]*\$/g,"xxxx").length>22;});
-    a.className="answers"+(long?" long":"")+(q.ch.length===2&&long?" one":"");
+    /* longueur visible : une formule compte pour ses symboles (sans les commandes LaTeX) */
+    var vl=function(c){return String(c).replace(/\$([^$]*)\$/g,function(m,t){return t.replace(/\\[a-zA-Z]+/g,"x").replace(/[{}^_ ]/g,"");}).length;};
+    var long=q.ch.some(function(c){return vl(c)>22;}),vlong=q.ch.some(function(c){return vl(c)>32;});
+    a.className="answers"+(long?" long":"")+((q.ch.length===2&&long)||vlong||(long&&!document.body.classList.contains("v-pc"))?" one":"");
     a.innerHTML=q.ch.map(function(c,k){return '<button type="button" class="ab a'+k+'" data-k="'+k+'"><span class="sh">'+SHAPES[k]+"</span><span>"+rt(c)+"</span></button>";}).join("");
   }
   if(done){sentMsg("Réponse envoyée ✓ — attends la correction");$("q-ans").classList.add("off");$("q-free").classList.add("hidden");$("q-wid").classList.add("hidden");}
@@ -5437,7 +5540,7 @@ $("go-carnet").addEventListener("click",openCarnet);
   $("ps-dice").innerHTML=ICO.dice+"Prendre un pseudo au hasard";
   $("go-train").innerHTML=ICO.rocket+"S’entraîner seul";
   $("go-carnet").innerHTML=ICO.star+"Mon carnet";
-  initZoom("eleve",$("zoom"));
+  initZoom("eleve",$("zoom"));fitWatch($("app"));
   var p=store.get("eleve",null);if(p)for(var k in PREF)if(p[k]!==undefined)PREF[k]=p[k];
   setView(PREF.view||"mob");soundLabel();
   renderSlots();show("s-code");

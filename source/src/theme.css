@@ -21,13 +21,13 @@
   --fz:1;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{font-size:calc(16px * var(--fz) * var(--fit,1));-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{font-size:calc(16px * var(--fz) * var(--fit,1) * var(--dz,1));-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{margin:0;min-height:100%}
 body{font-family:var(--f);font-weight:600;color:var(--ink);line-height:1.4;background-color:var(--bg);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;background-attachment:fixed;font-variant-numeric:tabular-nums}
 h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.01em;line-height:1.15}
 a{color:var(--violet-d)}
-button,input,select,textarea{font-family:inherit;font-weight:700;color:inherit}
+button,input,select,textarea{font-family:inherit;font-weight:700;color:inherit;font-size:.84rem}
 button{cursor:pointer}
 .hidden{display:none!important}
 .muted{color:var(--ink2)}
@@ -213,6 +213,22 @@ canvas.fx-confetti{position:fixed;top:0;right:0;bottom:0;left:0;width:100%;heigh
   .ibtn{height:2.1rem;min-width:2.1rem;padding:0 .5rem}
   .top .tools{gap:.3rem;flex-wrap:nowrap}
 }
+/* même réglage quand un téléphone affiche la page en « version ordinateur » (classe posée par dzCalc) */
+html.narrow .top{gap:.35rem;padding:.45rem .55rem;flex-wrap:nowrap}
+html.narrow #brand{min-width:0;overflow:hidden;flex:0 1 auto}html.narrow .top .tools{flex:none}
+html.narrow .brand{font-size:1rem;gap:.3rem}html.narrow .brand svg{width:1.7rem;height:1.7rem}html.narrow .brand small{display:none}
+html.narrow .zoom span{display:none}html.narrow .zoom button{min-width:1.9rem;height:1.9rem;font-size:.85rem}
+html.narrow .vsw button{padding:.3rem .55rem;font-size:.75rem}
+html.narrow .ibtn{height:2.1rem;min-width:2.1rem;padding:0 .5rem}
+html.narrow .top .tools{gap:.3rem;flex-wrap:nowrap}
+/* formules : jamais coupées au milieu d’un nombre ; sur les écrans ajustés, d’un seul tenant */
+.katex,.katex *{overflow-wrap:normal;word-break:normal}
+.nw{white-space:nowrap}
+body.kwrap .nw{white-space:normal}
+body.fit:not(.kwrap) .katex{white-space:nowrap}
+/* écran ajusté : l’en-tête garde sa taille, la page n’impose plus de hauteur minimale */
+body.fit #app{min-height:0}
+body.fit .top,body.fit #foot{zoom:var(--tz,1)}
 
 
 /* ═══ FORMATS DE QUESTIONS (commun prof / élève) ═══ */

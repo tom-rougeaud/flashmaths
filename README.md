@@ -28,6 +28,14 @@ Le prof règle la partie, choisit des notions dans le programme de son niveau, v
   <img src="readme-eleve.png" alt="Sur le téléphone : temps de lecture, réponse, guirlande de fin" width="760">
 </p>
 
+## Nouveautés de la version 3.6
+
+- **Tous les écrans s’ajustent** (code, prénom, salle, règles, questions, correction, fin), en largeur comme en hauteur : la place restante agrandit les réponses ou centre le contenu, sans défilement.
+- **Téléphones en « version ordinateur »** : la page est compensée et reste lisible.
+- **Formules jamais coupées** : une formule reste d’un seul tenant (sinon elle passe à la ligne à un signe =, +, −, jamais au milieu d’un nombre).
+- **Règles plus courtes** : seules celles des formats présents dans la partie sont affichées, à la bonne taille sur PC comme sur téléphone.
+- **Au tableau** : la figure se place à droite de l’énoncé, et le bouton **Agrandir le média** affiche la figure, le graphique ou la formule en plein écran.
+
 ## Nouveautés de la version 3.5
 
 - **Plein écran automatique** : sur téléphone, tablette, PC et au tableau, la question s’agrandit pour remplir l’écran, sans défilement et sans déformer les figures.
@@ -52,7 +60,7 @@ Le prof règle la partie, choisit des notions dans le programme de son niveau, v
 - **Générer** : toutes les questions sont visibles et modifiables avant de jouer (réponses masquées par défaut pour projeter), réordonnables, avec un nouveau tirage question par question.
 - **Import de questions** en texte simple : `*` devant la bonne réponse, `= 4,5` pour une saisie libre, tuiles, remise en ordre, estimation.
 - Temps de réponse : automatique, 15 s à 5 min, ou un temps propre à chaque notion.
-- En jeu : **+30 s**, **Corriger maintenant**, **Écourter**, enchaînement automatique activable à tout moment, réponse de chaque joueur après chaque question.
+- En jeu : **Agrandir le média** (figure ou formule en plein écran), **+30 s**, **Corriger maintenant**, **Écourter**, enchaînement automatique activable à tout moment, réponse de chaque joueur après chaque question.
 - QR code en plein écran, fenêtre **Joueurs** (renommer, exclure, retardataire), alerte quand un élève quitte la page du jeu.
 - Fin de partie : diagnostic des erreurs types, bilan par élève et par question, exports CSV, historique.
 

@@ -58,7 +58,7 @@ $("m-q").addEventListener("click",function(e){if(e.target.id==="m-q"){var q=QS[M
 (function init(){
   $("brand").outerHTML=brandHtml("prof","index.html");
   $("foot").innerHTML=footHtml();
-  initZoom("prof",$("zoom"));
+  initZoom("prof",$("zoom"));fitWatch($("s-game"));
   loadSetup();soundBtn();
   setView(P.view||(window.innerWidth<720?"mob":"proj"));
   refreshAll();dbBanner();

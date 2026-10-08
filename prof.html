@@ -37,13 +37,13 @@
   --fz:1;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{font-size:calc(16px * var(--fz) * var(--fit,1));-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{font-size:calc(16px * var(--fz) * var(--fit,1) * var(--dz,1));-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{margin:0;min-height:100%}
 body{font-family:var(--f);font-weight:600;color:var(--ink);line-height:1.4;background-color:var(--bg);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;background-attachment:fixed;font-variant-numeric:tabular-nums}
 h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.01em;line-height:1.15}
 a{color:var(--violet-d)}
-button,input,select,textarea{font-family:inherit;font-weight:700;color:inherit}
+button,input,select,textarea{font-family:inherit;font-weight:700;color:inherit;font-size:.84rem}
 button{cursor:pointer}
 .hidden{display:none!important}
 .muted{color:var(--ink2)}
@@ -229,6 +229,22 @@ canvas.fx-confetti{position:fixed;top:0;right:0;bottom:0;left:0;width:100%;heigh
   .ibtn{height:2.1rem;min-width:2.1rem;padding:0 .5rem}
   .top .tools{gap:.3rem;flex-wrap:nowrap}
 }
+/* même réglage quand un téléphone affiche la page en « version ordinateur » (classe posée par dzCalc) */
+html.narrow .top{gap:.35rem;padding:.45rem .55rem;flex-wrap:nowrap}
+html.narrow #brand{min-width:0;overflow:hidden;flex:0 1 auto}html.narrow .top .tools{flex:none}
+html.narrow .brand{font-size:1rem;gap:.3rem}html.narrow .brand svg{width:1.7rem;height:1.7rem}html.narrow .brand small{display:none}
+html.narrow .zoom span{display:none}html.narrow .zoom button{min-width:1.9rem;height:1.9rem;font-size:.85rem}
+html.narrow .vsw button{padding:.3rem .55rem;font-size:.75rem}
+html.narrow .ibtn{height:2.1rem;min-width:2.1rem;padding:0 .5rem}
+html.narrow .top .tools{gap:.3rem;flex-wrap:nowrap}
+/* formules : jamais coupées au milieu d’un nombre ; sur les écrans ajustés, d’un seul tenant */
+.katex,.katex *{overflow-wrap:normal;word-break:normal}
+.nw{white-space:nowrap}
+body.kwrap .nw{white-space:normal}
+body.fit:not(.kwrap) .katex{white-space:nowrap}
+/* écran ajusté : l’en-tête garde sa taille, la page n’impose plus de hauteur minimale */
+body.fit #app{min-height:0}
+body.fit .top,body.fit #foot{zoom:var(--tz,1)}
 
 
 /* ═══ FORMATS DE QUESTIONS (commun prof / élève) ═══ */
@@ -811,7 +827,43 @@ body.ingame.v-mob #app{max-width:none;padding:.4rem .5rem .5rem}
 body.ingame .g-top{margin-bottom:.6rem}
 body.ingame .g-qbox{min-height:0}
 
-body.ingame .top{zoom:calc(1 / var(--fit,1))}
+
+
+/* v3.6 : la figure à droite de l’énoncé sur l’écran large ; « Agrandir le média » */
+.g-fig:empty{display:none}
+.g-fig{cursor:zoom-in}
+.g-fig .fig{margin:.2rem auto .6rem}
+body:not(.v-mob) .g-qbox.hasfig{display:grid;grid-template-columns:minmax(0,1fr) minmax(14rem,44%);grid-template-rows:auto auto auto 1fr;column-gap:1.4rem;grid-template-areas:"meta meta" "q fig" "ch fig" "rev fig";align-content:start}
+body:not(.v-mob) .g-qbox.hasfig .g-meta{grid-area:meta}
+body:not(.v-mob) .g-qbox.hasfig .g-q{grid-area:q;margin-right:0}
+body:not(.v-mob) .g-qbox.hasfig .g-choices{grid-area:ch}
+body:not(.v-mob) .g-qbox.hasfig .g-rev{grid-area:rev}
+body:not(.v-mob) .g-qbox.hasfig .g-fig{grid-area:fig;align-self:center;margin-top:4.6rem}
+body:not(.v-mob) .g-qbox.hasfig.rv .g-fig{align-self:start;margin-top:1rem}
+body:not(.v-mob) .g-qbox.hasfig .g-fig .fig{max-width:none;margin:0 auto}
+body:not(.v-mob) .g-qbox.hasfig .g-fig .figsvg{max-height:24rem}
+body:not(.v-mob) .g-qbox.hasfig.rv .g-fig .figsvg{max-height:20rem}
+body:not(.v-mob) .g-qbox.hasfig .g-choices{grid-template-columns:1fr}
+.mm{position:fixed;top:0;right:0;bottom:0;left:0;z-index:120;background:#fff;display:flex;flex-direction:column;padding:1.2vh 2vw 2vh;animation:fade .2s}
+.mm-h{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex:none;margin-bottom:1vh}
+.mm-n{font-weight:900;color:var(--ink2)}
+.mm-b{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.9fr);gap:2vw;align-items:stretch}
+.mm-b.nofig{grid-template-columns:1fr}
+.mm-b.nofig .mm-f{display:none}
+@media (orientation:portrait){.mm-b{grid-template-columns:1fr;grid-template-rows:minmax(0,.7fr) minmax(0,1.5fr)}}
+.mm-t{min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center;font-weight:900;line-height:1.3;color:var(--ink);text-align:left}
+.mm-b.nofig .mm-t{text-align:center}
+.mm-f{min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.mm-f .fig{margin:0;max-width:none;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.mm-b.svg .mm-f .figsvg{width:100%;height:100%;max-height:none}
+.mm-f .figtab,.mm-f .figcode{font-size:1em}
+.mm .katex{white-space:nowrap}
+body.ingame .g-scene .arena{min-height:9rem}
+body.ingame .g-scene .fighter svg{max-width:9rem}
+body:not(.v-mob) .g-qbox.hasfig.rv .g-choices{grid-template-columns:1fr 1fr}
+body.fit .g-top{zoom:calc(var(--tz,1) * var(--gz,1))}
+.g-choices.one{grid-template-columns:1fr!important}
+body.fit .g-choices{align-content:stretch;grid-auto-rows:1fr}
 
 </style>
 </head>
@@ -945,7 +997,7 @@ body.ingame .top{zoom:calc(1 / var(--fit,1))}
       <div class="g-host hidden" id="g-host"></div>
       <span class="sp"></span>
       <button type="button" class="btn btn-sm btn-soft" id="g-players"></button>
-      <button type="button" class="btn btn-sm btn-soft" id="g-plus">+30 s</button>
+      <button type="button" class="btn btn-sm btn-soft hidden" id="g-media" title="Afficher la figure ou la formule en plein écran pour la classe"></button><button type="button" class="btn btn-sm btn-soft" id="g-plus">+30 s</button>
       <button type="button" class="btn btn-sm btn-primary" id="g-next"></button>
       <button type="button" class="btn btn-sm btn-soft g-auto" id="g-auto" title="Enchaîner automatiquement 10 s après chaque correction"></button>
       <button type="button" class="btn btn-sm btn-ghost" id="g-short">Écourter</button>
@@ -956,14 +1008,16 @@ body.ingame .top{zoom:calc(1 / var(--fit,1))}
         <div class="g-timer" id="g-timer"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="tr-bg"/><circle cx="50" cy="50" r="44" class="tr-fg" id="g-ring"/></svg><b id="g-sec">20</b></div>
         <div class="g-meta" id="g-meta"></div>
         <div class="g-q" id="g-q"></div>
+        <div class="g-fig" id="g-fig" title="Cliquer pour agrandir"></div>
         <div class="g-choices" id="g-choices"></div>
         <div class="g-rev hidden" id="g-rev"></div>
       </div>
       <aside class="g-live" id="g-live" aria-live="polite"><div class="gl-h"><span class="gl-bulb" aria-hidden="true"></span><span><b id="gl-n">0</b> <span id="gl-t">réponse</span></span></div><ol class="gl-list" id="gl-list"></ol></aside>
       <div class="g-scene card" id="g-scene"></div>
     </div>
-    <div class="g-rules hidden" id="g-rules"><div class="rules-box" id="rules-box"></div></div>
+    <div class="g-rules hidden" id="g-rules" data-fit><div class="rules-box" id="rules-box"></div></div>
     <div class="g-cd hidden" id="g-cd"><div class="cd-bulbs" id="g-cdb" aria-hidden="true"><i></i><i></i><i></i></div><span id="g-cdt">Prêts ?</span></div>
+    <div class="mm hidden" id="m-media" role="dialog" aria-label="Média agrandi"><div class="mm-h"><span class="mm-n" id="mm-n"></span><button type="button" class="btn btn-soft" id="mm-x">Fermer (Échap)</button></div><div class="mm-b" id="mm-b"><div class="mm-t" id="mm-t"></div><div class="mm-f" id="mm-f"></div></div></div>
   </section>
 
   <!-- ═══ 5. FIN ═══ -->
@@ -3488,7 +3542,7 @@ var qrcode = function() {
    Les textes français utilisent l’apostrophe typographique ’.
 ═══════════════════════════════════════════════════════════════ */
 "use strict";
-var FM_VERSION="3.5";
+var FM_VERSION="3.6";
 function $(id){return document.getElementById(id);}
 function $$(sel,root){return [].slice.call((root||document).querySelectorAll(sel));}
 function esc(s){return String(s===undefined||s===null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -3602,6 +3656,7 @@ function rulesHtml(mode,o){
   var com=RULES.common.slice();
   if(o.sm==="juste")com[0]=["check","1 000 points par bonne réponse, quelle que soit la vitesse : prends le temps de bien réfléchir."];
   if(o.rd>0)com.splice(1,0,["eye","Les propositions apparaissent après "+o.rd+" secondes : lis bien l’énoncé d’abord."]);
+  if(typeof o.fk==="string"){var keep={keyb:"k",tiles:"t",target:"e"};com=com.filter(function(r){return !keep[r[0]]||o.fk.indexOf(keep[r[0]])>=0;});}
   var R=RULES[mode].slice();
   if(mode==="boss"){
     if(o.hd>0)R.splice(R.length-1,0,["clock","Handicap du prof : la question s’affiche sur son téléphone "+o.hd+" s après les vôtres."]);
@@ -3651,32 +3706,88 @@ function initZoom(key,host){
    Les figures (SVG à viewBox) et tous les blocs étant en rem, tout grandit ou rétrécit ensemble,
    sans déformation. Le zoom A− / A+ règle la taille maximale autorisée. */
 var FIT={on:false,min:0.6,max:1.9,base:1.9,T:null,busy:false};
-function fitSet(f){document.documentElement.style.setProperty("--fit",String(Math.round(f*1000)/1000));}
+/* Téléphone affiché en « version ordinateur » (Chrome « Site pour ordinateur », certains navigateurs intégrés) :
+   la page est mise en page sur ~980 px puis réduite, tout devient minuscule. On compense par --dz. */
+var DZ=1,COARSE=false;try{COARSE=window.matchMedia("(pointer:coarse)").matches;}catch(e){}
+function dzCalc(){
+  var d=document.documentElement,cw=d.clientWidth||window.innerWidth,sw=screen.width||cw,sh=screen.height||cw,coarse=false;
+  try{coarse=window.matchMedia("(pointer:coarse)").matches;}catch(e){}
+  var dev=window.innerWidth>window.innerHeight?Math.max(sw,sh):Math.min(sw,sh),z=1;
+  if(coarse&&dev>0&&dev<1100&&cw>dev*1.3)z=Math.min(3.2,cw/dev);
+  DZ=z;d.style.setProperty("--dz",String(Math.round(z*1000)/1000));
+  d.classList.toggle("narrow",cw/z<=480);d.classList.toggle("dzon",z>1);
+}
+dzCalc();
+function fitSet(f){var d=document.documentElement.style;d.setProperty("--fit",String(Math.round(f*1000)/1000));d.setProperty("--tz",String(f>1?Math.round(1000/f)/1000:1));}
+function visible(e){return !!(e&&e.getClientRects().length);}
+/* une formule (KaTeX) dépasse-t-elle du bloc qui la contient (ou de l’écran) ? */
+function fitKatexCut(){
+  var ks=document.querySelectorAll(".katex"),W=document.documentElement.clientWidth;
+  for(var i=0;i<ks.length;i++){
+    var k=ks[i];if(!visible(k))continue;var r=k.getBoundingClientRect();if(!r.width)continue;
+    if(r.right>W+1||r.left<-1)return true;
+    var c=k.parentElement;
+    while(c&&c!==document.body){var cs=getComputedStyle(c);if(cs.display.indexOf("inline")!==0)break;c=c.parentElement;}
+    if(c&&c!==document.body){var cr=c.getBoundingClientRect();if(r.right>cr.right+2||r.left<cr.left-2)return true;}
+  }
+  return false;
+}
 function fitOverflows(){
   var d=document.documentElement,b=document.body,h=window.innerHeight,w=d.clientWidth||window.innerWidth;
-  return Math.max(d.scrollHeight,b.scrollHeight)>h+1||Math.max(d.scrollWidth,b.scrollWidth)>w+1;
+  if(Math.max(d.scrollHeight,b.scrollHeight)>h+1||Math.max(d.scrollWidth,b.scrollWidth)>w+1)return true;
+  var xs=document.querySelectorAll("[data-fit]");
+  for(var i=0;i<xs.length;i++){var e=xs[i];if(visible(e)&&(e.scrollHeight>e.clientHeight+1||e.scrollWidth>e.clientWidth+1))return true;}
+  return fitKatexCut();
 }
-function fitNow(){
-  clearTimeout(FIT.T);
-  if(!FIT.on){fitSet(1);return;}
-  if(FIT.busy)return;FIT.busy=true;
-  var lo=FIT.min,hi=Math.max(FIT.min,FIT.max),best=lo,sy=window.scrollY;
+function fitSearch(){
+  var lo=FIT.min,hi=Math.max(FIT.min,FIT.max),best=lo;
   fitSet(hi);
   if(!fitOverflows())best=hi;
   else for(var i=0;i<9;i++){var mid=(lo+hi)/2;fitSet(mid);if(fitOverflows())hi=mid;else{lo=mid;best=mid;}}
-  fitSet(best*0.985);window.scrollTo(0,sy);FIT.busy=false;
+  fitSet(best*0.985);return best;
+}
+function fitNow(){
+  clearTimeout(FIT.T);
+  var b=document.body;
+  if(!FIT.on){fitSet(1);b.classList.remove("fit","kwrap");return;}
+  if(FIT.busy)return;FIT.busy=true;
+  var sy=window.scrollY;b.classList.add("fit");b.classList.remove("kwrap");
+  if(FIT.unfill)FIT.unfill();
+  if(FIT.pre)FIT.pre();
+  var A=fitSearch();
+  /* formule longue : si la garder d’un seul tenant oblige à trop réduire (ou si elle dépasse encore),
+     on autorise la coupure aux signes = + − × (jamais au milieu d’un nombre) */
+  if(fitKatexCut()){b.classList.add("kwrap");fitSearch();}
+  else if(A<FIT.max*0.95&&[].some.call(document.querySelectorAll(".katex"),visible)){
+    b.classList.add("kwrap");var K=fitSearch();
+    if(A>=K*0.8){b.classList.remove("kwrap");fitSet(A*0.985);if(fitOverflows())fitSearch();}
+  }
+  /* place restante en bas : la page la répartit (réponses plus hautes, contenu centré) */
+  if(FIT.fill){var mn=document.querySelector("main")||b,gap=window.innerHeight-(mn.getBoundingClientRect().bottom+parseFloat(getComputedStyle(mn).marginBottom||0));if(gap>8){FIT.fill(gap-6);if(fitOverflows()&&FIT.unfill)FIT.unfill();}}
+  window.scrollTo(0,sy);FIT.busy=false;
 }
 function fitSoon(ms){clearTimeout(FIT.T);FIT.T=setTimeout(fitNow,ms===undefined?30:ms);clearTimeout(FIT.T2);FIT.T2=setTimeout(function(){if(FIT.on)fitNow();},850);}
-/* on = écran de jeu affiché ; o = {min, max} */
+/* on = écran ajusté ; o = {min, max} */
 function fitScreen(on,o){
   FIT.on=!!on;if(o){if(o.min)FIT.min=o.min;if(o.max)FIT.base=o.max;}
   var z=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--fz"))||1;FIT.max=FIT.base*z;
-  if(!on){fitSet(1);return;}
+  if(!on){fitSet(1);document.body.classList.remove("fit","kwrap");return;}
   fitNow();fitSoon(250);
   clearTimeout(FIT.T2);FIT.T2=setTimeout(function(){if(FIT.on)fitNow();},850);   /* après les animations (secousse, apparition) */
 }
-window.addEventListener("resize",function(){if(FIT.on)fitSoon(120);});
-window.addEventListener("orientationchange",function(){if(FIT.on)fitSoon(300);});
+/* le contenu d’un écran change (élève qui arrive, correction, liste…) : on réajuste ; les simples changements de texte (chrono) sont ignorés */
+function fitWatch(root){
+  if(!root||!window.MutationObserver)return;
+  new MutationObserver(function(ms){
+    if(!FIT.on||FIT.busy)return;
+    for(var i=0;i<ms.length;i++){var m=ms[i],n=[].slice.call(m.addedNodes).concat([].slice.call(m.removedNodes));
+      for(var j=0;j<n.length;j++)if(n[j].nodeType===1){fitSoon(60);return;}
+      if(m.type==="attributes"&&m.attributeName==="class"&&/(^| )hidden( |$)/.test(String(m.oldValue||""))!==m.target.classList.contains("hidden")){fitSoon(60);return;}}
+  }).observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:["class"],attributeOldValue:true});
+}
+function typing(){var a=document.activeElement;return !!(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=="checkbox"&&a.type!=="radio"&&a.type!=="range");}
+window.addEventListener("resize",function(){dzCalc();if(FIT.on&&!(typing()&&COARSE))fitSoon(120);});
+window.addEventListener("orientationchange",function(){setTimeout(dzCalc,200);if(FIT.on)fitSoon(300);});
 try{if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(FIT.on)fitSoon(0);});}catch(e){}
 
 /* ─── Fenêtres, messages ─── */
@@ -3742,7 +3853,11 @@ function rt(s){
     else{
       var html=null;
       try{if(window.katex)html=katex.renderToString(parts[i].replace(/(\d),(\d)/g,"$1{,}$2"),{throwOnError:false,strict:"ignore",trust:false});}catch(e){html=null;}
-      out+=html||('<span class="tex">'+esc(parts[i])+"</span>");
+      html=html||('<span class="tex">'+esc(parts[i])+"</span>");
+      /* la ponctuation qui suit une formule reste collée à elle (jamais seule en début de ligne) */
+      var pm=i+1<parts.length&&/^[ \u00a0\u202f]?[.,;:!?)»…]+/.exec(parts[i+1]);
+      if(pm){out+='<span class="nw">'+html+esc(pm[0].replace(/^ /,"\u00a0"))+"</span>";parts[i+1]=parts[i+1].slice(pm[0].length);}
+      else out+=html;
     }
   }
   RT_CACHE[s]=out;return out;
@@ -4353,6 +4468,7 @@ function QX(r,intro,steps,bad,expl,o){
    aucune balise n’est transmise sur le réseau, seulement la description de la figure)
 ═══════════════════════════════════════════════════════════════ */
 var FIGC={v:"#5B55C4",c:"#D9606A",s:"#D59A2E",m:"#2E9E7E",k:"#4A86CF",ink:"#262A4F",g:"#E4E1F7",l:"#EEEBFF"};
+var FIG_N=0;
 var FIG_PAL=["#5B55C4","#D9606A","#D59A2E","#2E9E7E","#4A86CF","#C95B82"];
 function xe(s){return String(s===undefined||s===null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").slice(0,40);}
 function fnum(v){return typeof v==="number"&&isFinite(v)?v:0;}
@@ -4438,7 +4554,8 @@ function figHtml(fig){
       for(var a2=Math.ceil(xr[0]/stx)*stx;a2<=xr[1]+1e-9;a2+=stx){if(Math.abs(a2-x0)<1e-9&&x0===0)continue;if(x0===0&&y0===0&&Math.abs(a2+stx)<1e-9&&stx*sx<30)continue;if(fig.lx===false)break;if(Math.round(a2/stx)%(fig.ex||1)===0)b+=figT(gx(a2),Math.min(oy+GH+12,gy(y0)+12),f(a2,2),{fs:11,fw:700,halo:1});}
       for(var b2=Math.ceil(yr[0]/sty)*sty;b2<=yr[1]+1e-9;b2+=sty){if(Math.abs(b2-y0)<1e-9&&y0===0)continue;if(x0===0&&y0===0&&Math.abs(b2+sty)<1e-9&&sty*sy<24)continue;if(fig.ly===false)break;if(Math.round(b2/sty)%(fig.ey||1)===0)b+=figT(gx(x0)-7,gy(b2),f(b2,2),{fs:11,fw:700,a:"end",halo:1});}
       if(x0===0&&y0===0)b+=figT(gx(0)-8,Math.min(oy+GH+12,gy(0)+11),"0",{fs:11,fw:700,halo:1});var labs=b.slice(bl);b=b.slice(0,bl);
-      b+='<clipPath id="fgclip"><rect x="'+(ox-2)+'" y="'+(oy-2)+'" width="'+(GW+4)+'" height="'+(GH+4)+'"/></clipPath><g clip-path="url(#fgclip)">';
+      var cid="fgc"+(++FIG_N);   /* identifiant unique : plusieurs repères peuvent cohabiter dans la page */
+      b+='<clipPath id="'+cid+'"><rect x="'+(ox-2)+'" y="'+(oy-2)+'" width="'+(GW+4)+'" height="'+(GH+4)+'"/></clipPath><g clip-path="url(#'+cid+')">';
       (fig.curves||(fig.pts?[fig.pts]:[])).forEach(function(cv,ci){
         var d=cv.map(function(p,pi){return (pi?"L":"M")+rd(gx(p[0]),1)+" "+rd(gy(p[1]),1);}).join("");
         b+='<path d="'+d+'" fill="none" stroke="'+FIG_PAL[ci===0?0:1+ci%5]+'" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>';
@@ -8587,13 +8704,15 @@ function nextQuestion(){
   liveReset();
   $("g-qn").textContent="Question "+(G.i+1)+" / "+G.qs.length;
   $("g-meta").innerHTML=kindTagHtml(q)+'<span class="tag">'+esc(q.titre||"")+"</span>";
-  $("g-q").innerHTML=rt(q.q)+figBlock(q.fig);
+  setGameQ(q);
   var kd=qKind(q);
   if(q.libre)$("g-choices").innerHTML='<div class="g-hidden" style="grid-column:1/-1">'+ICO.keyb+"Répondez sur votre téléphone avec le clavier</div>";
   else if(wideKind(q))$("g-choices").innerHTML='<div class="g-wide">'+(kd==="slider"?scaleHtml(q.sl,{big:true}):P.hide?'<div class="g-hidden">'+ICO.eyeoff+"Les tuiles sont sur vos téléphones</div>":kd==="assoc"?assocHtml(q):ordreHtml(q))+'<div class="g-how">'+(kd==="slider"?"Estimez avec le curseur sur votre téléphone":kd==="assoc"?"Associez les tuiles deux par deux":"Remettez les tuiles dans l’ordre"+(q.how?" : "+esc(q.how):""))+"</div></div>";
   else if(P.hide)$("g-choices").innerHTML='<div class="g-hidden" style="grid-column:1/-1">'+ICO.eyeoff+"Les propositions sont sur vos téléphones</div>";
   else $("g-choices").innerHTML=q.choices.map(function(c,k){return '<div class="gch a'+k+'"><span class="sh">'+SHAPES[k]+"</span><span>"+rt(c.t)+"</span></div>";}).join("");
   $("g-choices").style.gridTemplateColumns=(!q.libre&&!wideKind(q)&&!P.hide&&q.choices.length===2)?"1fr 1fr":"";
+  var vl=function(c){return String(c).replace(/\$([^$]*)\$/g,function(m,t){return t.replace(/\\[a-zA-Z]+/g,"x").replace(/[{}^_ ]/g,"");}).length;};
+  $("g-choices").classList.toggle("one",!q.libre&&!wideKind(q)&&!P.hide&&q.choices.some(function(c){return vl(c.t)>26;}));
   $("g-rev").classList.add("hidden");$("g-rev").innerHTML="";$("g-qbox").classList.remove("rv");
   $("g-timer").classList.remove("hidden","low");
   $("g-next").innerHTML=ICO.check+"Corriger maintenant";$("g-plus").disabled=false;
@@ -8825,7 +8944,7 @@ function openAnswers(i){
   openModal("m-ans");
 }
 $("g-rev").addEventListener("click",function(e){if(e.target.closest("#g-ansall"))openAnswers();});
-function renderRevealFromHist(i){var h=G.hist[i];if(!h)return;showGameScreen();$("g-qn").textContent="Question "+(i+1)+" / "+G.qs.length;$("g-q").innerHTML=rt(G.qs[i].q)+figBlock(G.qs[i].fig);$("g-meta").innerHTML="";renderReveal(h,null,null);}
+function renderRevealFromHist(i){var h=G.hist[i];if(!h)return;showGameScreen();$("g-qn").textContent="Question "+(i+1)+" / "+G.qs.length;setGameQ(G.qs[i]);$("g-meta").innerHTML="";renderReveal(h,null,null);}
 function medianOf(a){var s=a.slice().sort(function(x,y){return x-y;}),n=s.length;return n?(n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2):0;}
 /* erreur type la plus fréquente sur cette question (diagnostic pour le prof) */
 function errTopHtml(errs,nAns){
@@ -8875,14 +8994,82 @@ function whoHtml(h){
 /* ─── écran des règles avant la partie ─── */
 function showRules(cb){
   var box=$("rules-box");
-  $("g-qn").textContent="Question 1 / "+G.qs.length;$("g-q").innerHTML="";$("g-choices").innerHTML="";$("g-meta").innerHTML="";$("g-rev").classList.add("hidden");
+  $("g-qn").textContent="Question 1 / "+G.qs.length;$("g-q").innerHTML="";$("g-fig").innerHTML="";$("g-qbox").classList.remove("hasfig");$("g-media").classList.add("hidden");$("g-choices").innerHTML="";$("g-meta").innerHTML="";$("g-rev").classList.add("hidden");
   $("g-timer").classList.add("hidden");$("g-next").innerHTML=ICO.play+"Démarrer";$("g-ans").textContent="";
-  box.innerHTML=rulesHtml(G.mode,{sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen})+'<div class="rules-act"><button type="button" class="btn btn-ghost" id="ru-back">Retour à la salle</button><button type="button" class="btn btn-go btn-xl" id="ru-go">'+ICO.play+"C’est parti !</button></div>";
+  /* formats présents dans la partie : seules leurs règles sont affichées */
+  var fk=G.qs.map(function(q){var k=qKind(q);return (q.libre?"k":"")+(k==="assoc"||k==="ordre"?"t":"")+(k==="slider"?"e":"");}).join("");
+  box.innerHTML=rulesHtml(G.mode,{sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen,fk:fk})+'<div class="rules-act"><button type="button" class="btn btn-ghost" id="ru-back">Retour à la salle</button><button type="button" class="btn btn-go btn-xl" id="ru-go">'+ICO.play+"C’est parti !</button></div>";
   $("g-rules").classList.remove("hidden");
-  send({t:"ru",m:G.mode,sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen?1:0});
-  $("ru-go").onclick=function(){$("g-rules").classList.add("hidden");cb();};
+  send({t:"ru",m:G.mode,sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen?1:0,fk:fk});fitSoon(0);
+  $("ru-go").onclick=function(){$("g-rules").classList.add("hidden");fitSoon(0);cb();};
   $("ru-back").onclick=function(){$("g-rules").classList.add("hidden");G.phase="lobby";G.lk=false;pushLobby();renderLobby();show("s-lobby");};
 }
+
+/* ─── v3.6 : énoncé + figure ; « Agrandir le média » ─── */
+function setGameQ(q){
+  closeMedia();
+  $("g-q").innerHTML=rt(q.q);
+  var fb=figBlock(q.fig);$("g-fig").innerHTML=fb;
+  $("g-qbox").classList.toggle("hasfig",!!fb);
+  $("g-media").classList.toggle("hidden",!fb&&String(q.q).indexOf("$")<0);
+  G.mq=q;
+}
+$("g-media").innerHTML=ICO.full+"Agrandir le média";
+$("g-media").addEventListener("click",openMedia);
+$("g-fig").addEventListener("click",openMedia);
+$("mm-x").addEventListener("click",closeMedia);
+$("m-media").addEventListener("click",function(e){if(e.target===this||e.target.id==="mm-b")closeMedia();});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("m-media").classList.contains("hidden"))closeMedia();});
+window.addEventListener("resize",function(){if(!$("m-media").classList.contains("hidden"))fitMedia();});
+function openMedia(){
+  var q=G&&G.mq;if(!q)return;
+  $("mm-n").textContent=$("g-qn").textContent;
+  $("mm-t").innerHTML="<div>"+rt(q.q)+"</div>";
+  var fb=figBlock(q.fig);$("mm-f").innerHTML=fb;
+  $("mm-b").classList.toggle("nofig",!fb);
+  $("mm-b").classList.toggle("svg",!!(fb&&fb.indexOf("<svg")>=0));
+  $("m-media").classList.remove("hidden");
+  fitMedia();setTimeout(fitMedia,120);
+}
+function closeMedia(){var m=$("m-media");if(m)m.classList.add("hidden");}
+/* le texte (et un tableau ou un programme) prend la plus grande taille qui tient dans sa zone, formules entières */
+function fitBox(el,lo,hi){
+  if(!el||!el.innerHTML)return;
+  var ok=function(){
+    if(el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)return false;
+    var r=el.getBoundingClientRect(),ks=el.querySelectorAll(".katex");
+    for(var i=0;i<ks.length;i++){var k=ks[i].getBoundingClientRect();if(k.right>r.right+1||k.left<r.left-1)return false;}
+    return true;};
+  var best=lo;
+  for(var i=0;i<12;i++){var mid=(lo+hi)/2;el.style.fontSize=mid+"px";if(ok()){best=mid;lo=mid;}else hi=mid;}
+  el.style.fontSize=best+"px";
+}
+function fitMedia(){
+  if($("m-media").classList.contains("hidden"))return;
+  /* figure : la colonne prend la largeur que permet la hauteur disponible (sans déformation) */
+  var b=$("mm-b"),sv=$("mm-f").querySelector("svg");b.style.gridTemplateColumns="";b.style.gridTemplateRows="";
+  if(sv&&!b.classList.contains("nofig")){
+    var vb=(sv.getAttribute("viewBox")||"0 0 4 3").split(/\s+/),ar=(+vb[2]||4)/(+vb[3]||3),W=b.clientWidth,H=b.clientHeight;
+    if(W>=H){var fw=Math.min(H*ar,W*0.74);b.style.gridTemplateColumns="minmax(0,1fr) "+Math.round(fw)+"px";}
+    else{var fh=Math.min(W/ar,H*0.72);b.style.gridTemplateRows="minmax(0,1fr) "+Math.round(fh)+"px";}
+  }
+  fitBox($("mm-t"),12,Math.max(40,window.innerHeight*($("mm-b").classList.contains("nofig")?0.16:0.09)));
+  if(!$("mm-b").classList.contains("svg"))fitBox($("mm-f"),12,Math.max(40,window.innerHeight*0.12));
+}
+/* place restante en bas pendant une question : les propositions s’agrandissent */
+FIT.unfill=function(){var c=$("g-choices");if(c)c.style.minHeight="";};
+FIT.fill=function(gap){
+  if(!G||G.phase!=="q"||!$("g-rules").classList.contains("hidden"))return;
+  var c=$("g-choices");if(!c||!c.children.length||!visible(c))return;
+  c.style.minHeight=(c.getBoundingClientRect().height+Math.min(gap,window.innerHeight*0.35))+"px";
+};
+/* barre d’outils du jeu sur une seule ligne : elle rétrécit un peu si la fenêtre est étroite */
+FIT.pre=function(){
+  var t=document.querySelector("#s-game .g-top");if(!t||!visible(t))return;
+  var st=document.documentElement.style,z=1;st.setProperty("--gz","1");
+  var row=function(){var k=[].filter.call(t.children,visible);if(!k.length)return true;var c=function(e){var r=e.getBoundingClientRect();return (r.top+r.bottom)/2;},y=c(k[0]);return k.every(function(e){return Math.abs(c(e)-y)<10;});};
+  while(!row()&&z>0.66){z-=0.06;st.setProperty("--gz",String(z));}
+};
 
 /* ═══════════════════════════════════════════════════════════════
    PAGE PROF — 5. Fin de partie : podium, bilan, exports, historique
@@ -9235,7 +9422,7 @@ $("m-q").addEventListener("click",function(e){if(e.target.id==="m-q"){var q=QS[M
 (function init(){
   $("brand").outerHTML=brandHtml("prof","index.html");
   $("foot").innerHTML=footHtml();
-  initZoom("prof",$("zoom"));
+  initZoom("prof",$("zoom"));fitWatch($("s-game"));
   loadSetup();soundBtn();
   setView(P.view||(window.innerWidth<720?"mob":"proj"));
   refreshAll();dbBanner();

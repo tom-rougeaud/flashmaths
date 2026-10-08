@@ -463,4 +463,40 @@ body.ingame.v-mob #app{max-width:none;padding:.4rem .5rem .5rem}
 body.ingame .g-top{margin-bottom:.6rem}
 body.ingame .g-qbox{min-height:0}
 
-body.ingame .top{zoom:calc(1 / var(--fit,1))}
+
+
+/* v3.6 : la figure à droite de l’énoncé sur l’écran large ; « Agrandir le média » */
+.g-fig:empty{display:none}
+.g-fig{cursor:zoom-in}
+.g-fig .fig{margin:.2rem auto .6rem}
+body:not(.v-mob) .g-qbox.hasfig{display:grid;grid-template-columns:minmax(0,1fr) minmax(14rem,44%);grid-template-rows:auto auto auto 1fr;column-gap:1.4rem;grid-template-areas:"meta meta" "q fig" "ch fig" "rev fig";align-content:start}
+body:not(.v-mob) .g-qbox.hasfig .g-meta{grid-area:meta}
+body:not(.v-mob) .g-qbox.hasfig .g-q{grid-area:q;margin-right:0}
+body:not(.v-mob) .g-qbox.hasfig .g-choices{grid-area:ch}
+body:not(.v-mob) .g-qbox.hasfig .g-rev{grid-area:rev}
+body:not(.v-mob) .g-qbox.hasfig .g-fig{grid-area:fig;align-self:center;margin-top:4.6rem}
+body:not(.v-mob) .g-qbox.hasfig.rv .g-fig{align-self:start;margin-top:1rem}
+body:not(.v-mob) .g-qbox.hasfig .g-fig .fig{max-width:none;margin:0 auto}
+body:not(.v-mob) .g-qbox.hasfig .g-fig .figsvg{max-height:24rem}
+body:not(.v-mob) .g-qbox.hasfig.rv .g-fig .figsvg{max-height:20rem}
+body:not(.v-mob) .g-qbox.hasfig .g-choices{grid-template-columns:1fr}
+.mm{position:fixed;top:0;right:0;bottom:0;left:0;z-index:120;background:#fff;display:flex;flex-direction:column;padding:1.2vh 2vw 2vh;animation:fade .2s}
+.mm-h{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex:none;margin-bottom:1vh}
+.mm-n{font-weight:900;color:var(--ink2)}
+.mm-b{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.9fr);gap:2vw;align-items:stretch}
+.mm-b.nofig{grid-template-columns:1fr}
+.mm-b.nofig .mm-f{display:none}
+@media (orientation:portrait){.mm-b{grid-template-columns:1fr;grid-template-rows:minmax(0,.7fr) minmax(0,1.5fr)}}
+.mm-t{min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center;font-weight:900;line-height:1.3;color:var(--ink);text-align:left}
+.mm-b.nofig .mm-t{text-align:center}
+.mm-f{min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.mm-f .fig{margin:0;max-width:none;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.mm-b.svg .mm-f .figsvg{width:100%;height:100%;max-height:none}
+.mm-f .figtab,.mm-f .figcode{font-size:1em}
+.mm .katex{white-space:nowrap}
+body.ingame .g-scene .arena{min-height:9rem}
+body.ingame .g-scene .fighter svg{max-width:9rem}
+body:not(.v-mob) .g-qbox.hasfig.rv .g-choices{grid-template-columns:1fr 1fr}
+body.fit .g-top{zoom:calc(var(--tz,1) * var(--gz,1))}
+.g-choices.one{grid-template-columns:1fr!important}
+body.fit .g-choices{align-content:stretch;grid-auto-rows:1fr}

@@ -75,13 +75,15 @@ function nextQuestion(){
   liveReset();
   $("g-qn").textContent="Question "+(G.i+1)+" / "+G.qs.length;
   $("g-meta").innerHTML=kindTagHtml(q)+'<span class="tag">'+esc(q.titre||"")+"</span>";
-  $("g-q").innerHTML=rt(q.q)+figBlock(q.fig);
+  setGameQ(q);
   var kd=qKind(q);
   if(q.libre)$("g-choices").innerHTML='<div class="g-hidden" style="grid-column:1/-1">'+ICO.keyb+"Répondez sur votre téléphone avec le clavier</div>";
   else if(wideKind(q))$("g-choices").innerHTML='<div class="g-wide">'+(kd==="slider"?scaleHtml(q.sl,{big:true}):P.hide?'<div class="g-hidden">'+ICO.eyeoff+"Les tuiles sont sur vos téléphones</div>":kd==="assoc"?assocHtml(q):ordreHtml(q))+'<div class="g-how">'+(kd==="slider"?"Estimez avec le curseur sur votre téléphone":kd==="assoc"?"Associez les tuiles deux par deux":"Remettez les tuiles dans l’ordre"+(q.how?" : "+esc(q.how):""))+"</div></div>";
   else if(P.hide)$("g-choices").innerHTML='<div class="g-hidden" style="grid-column:1/-1">'+ICO.eyeoff+"Les propositions sont sur vos téléphones</div>";
   else $("g-choices").innerHTML=q.choices.map(function(c,k){return '<div class="gch a'+k+'"><span class="sh">'+SHAPES[k]+"</span><span>"+rt(c.t)+"</span></div>";}).join("");
   $("g-choices").style.gridTemplateColumns=(!q.libre&&!wideKind(q)&&!P.hide&&q.choices.length===2)?"1fr 1fr":"";
+  var vl=function(c){return String(c).replace(/\$([^$]*)\$/g,function(m,t){return t.replace(/\\[a-zA-Z]+/g,"x").replace(/[{}^_ ]/g,"");}).length;};
+  $("g-choices").classList.toggle("one",!q.libre&&!wideKind(q)&&!P.hide&&q.choices.some(function(c){return vl(c.t)>26;}));
   $("g-rev").classList.add("hidden");$("g-rev").innerHTML="";$("g-qbox").classList.remove("rv");
   $("g-timer").classList.remove("hidden","low");
   $("g-next").innerHTML=ICO.check+"Corriger maintenant";$("g-plus").disabled=false;
@@ -313,7 +315,7 @@ function openAnswers(i){
   openModal("m-ans");
 }
 $("g-rev").addEventListener("click",function(e){if(e.target.closest("#g-ansall"))openAnswers();});
-function renderRevealFromHist(i){var h=G.hist[i];if(!h)return;showGameScreen();$("g-qn").textContent="Question "+(i+1)+" / "+G.qs.length;$("g-q").innerHTML=rt(G.qs[i].q)+figBlock(G.qs[i].fig);$("g-meta").innerHTML="";renderReveal(h,null,null);}
+function renderRevealFromHist(i){var h=G.hist[i];if(!h)return;showGameScreen();$("g-qn").textContent="Question "+(i+1)+" / "+G.qs.length;setGameQ(G.qs[i]);$("g-meta").innerHTML="";renderReveal(h,null,null);}
 function medianOf(a){var s=a.slice().sort(function(x,y){return x-y;}),n=s.length;return n?(n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2):0;}
 /* erreur type la plus fréquente sur cette question (diagnostic pour le prof) */
 function errTopHtml(errs,nAns){
@@ -363,11 +365,79 @@ function whoHtml(h){
 /* ─── écran des règles avant la partie ─── */
 function showRules(cb){
   var box=$("rules-box");
-  $("g-qn").textContent="Question 1 / "+G.qs.length;$("g-q").innerHTML="";$("g-choices").innerHTML="";$("g-meta").innerHTML="";$("g-rev").classList.add("hidden");
+  $("g-qn").textContent="Question 1 / "+G.qs.length;$("g-q").innerHTML="";$("g-fig").innerHTML="";$("g-qbox").classList.remove("hasfig");$("g-media").classList.add("hidden");$("g-choices").innerHTML="";$("g-meta").innerHTML="";$("g-rev").classList.add("hidden");
   $("g-timer").classList.add("hidden");$("g-next").innerHTML=ICO.play+"Démarrer";$("g-ans").textContent="";
-  box.innerHTML=rulesHtml(G.mode,{sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen})+'<div class="rules-act"><button type="button" class="btn btn-ghost" id="ru-back">Retour à la salle</button><button type="button" class="btn btn-go btn-xl" id="ru-go">'+ICO.play+"C’est parti !</button></div>";
+  /* formats présents dans la partie : seules leurs règles sont affichées */
+  var fk=G.qs.map(function(q){var k=qKind(q);return (q.libre?"k":"")+(k==="assoc"||k==="ordre"?"t":"")+(k==="slider"?"e":"");}).join("");
+  box.innerHTML=rulesHtml(G.mode,{sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen,fk:fk})+'<div class="rules-act"><button type="button" class="btn btn-ghost" id="ru-back">Retour à la salle</button><button type="button" class="btn btn-go btn-xl" id="ru-go">'+ICO.play+"C’est parti !</button></div>";
   $("g-rules").classList.remove("hidden");
-  send({t:"ru",m:G.mode,sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen?1:0});
-  $("ru-go").onclick=function(){$("g-rules").classList.add("hidden");cb();};
+  send({t:"ru",m:G.mode,sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen?1:0,fk:fk});fitSoon(0);
+  $("ru-go").onclick=function(){$("g-rules").classList.add("hidden");fitSoon(0);cb();};
   $("ru-back").onclick=function(){$("g-rules").classList.add("hidden");G.phase="lobby";G.lk=false;pushLobby();renderLobby();show("s-lobby");};
 }
+
+/* ─── v3.6 : énoncé + figure ; « Agrandir le média » ─── */
+function setGameQ(q){
+  closeMedia();
+  $("g-q").innerHTML=rt(q.q);
+  var fb=figBlock(q.fig);$("g-fig").innerHTML=fb;
+  $("g-qbox").classList.toggle("hasfig",!!fb);
+  $("g-media").classList.toggle("hidden",!fb&&String(q.q).indexOf("$")<0);
+  G.mq=q;
+}
+$("g-media").innerHTML=ICO.full+"Agrandir le média";
+$("g-media").addEventListener("click",openMedia);
+$("g-fig").addEventListener("click",openMedia);
+$("mm-x").addEventListener("click",closeMedia);
+$("m-media").addEventListener("click",function(e){if(e.target===this||e.target.id==="mm-b")closeMedia();});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("m-media").classList.contains("hidden"))closeMedia();});
+window.addEventListener("resize",function(){if(!$("m-media").classList.contains("hidden"))fitMedia();});
+function openMedia(){
+  var q=G&&G.mq;if(!q)return;
+  $("mm-n").textContent=$("g-qn").textContent;
+  $("mm-t").innerHTML="<div>"+rt(q.q)+"</div>";
+  var fb=figBlock(q.fig);$("mm-f").innerHTML=fb;
+  $("mm-b").classList.toggle("nofig",!fb);
+  $("mm-b").classList.toggle("svg",!!(fb&&fb.indexOf("<svg")>=0));
+  $("m-media").classList.remove("hidden");
+  fitMedia();setTimeout(fitMedia,120);
+}
+function closeMedia(){var m=$("m-media");if(m)m.classList.add("hidden");}
+/* le texte (et un tableau ou un programme) prend la plus grande taille qui tient dans sa zone, formules entières */
+function fitBox(el,lo,hi){
+  if(!el||!el.innerHTML)return;
+  var ok=function(){
+    if(el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)return false;
+    var r=el.getBoundingClientRect(),ks=el.querySelectorAll(".katex");
+    for(var i=0;i<ks.length;i++){var k=ks[i].getBoundingClientRect();if(k.right>r.right+1||k.left<r.left-1)return false;}
+    return true;};
+  var best=lo;
+  for(var i=0;i<12;i++){var mid=(lo+hi)/2;el.style.fontSize=mid+"px";if(ok()){best=mid;lo=mid;}else hi=mid;}
+  el.style.fontSize=best+"px";
+}
+function fitMedia(){
+  if($("m-media").classList.contains("hidden"))return;
+  /* figure : la colonne prend la largeur que permet la hauteur disponible (sans déformation) */
+  var b=$("mm-b"),sv=$("mm-f").querySelector("svg");b.style.gridTemplateColumns="";b.style.gridTemplateRows="";
+  if(sv&&!b.classList.contains("nofig")){
+    var vb=(sv.getAttribute("viewBox")||"0 0 4 3").split(/\s+/),ar=(+vb[2]||4)/(+vb[3]||3),W=b.clientWidth,H=b.clientHeight;
+    if(W>=H){var fw=Math.min(H*ar,W*0.74);b.style.gridTemplateColumns="minmax(0,1fr) "+Math.round(fw)+"px";}
+    else{var fh=Math.min(W/ar,H*0.72);b.style.gridTemplateRows="minmax(0,1fr) "+Math.round(fh)+"px";}
+  }
+  fitBox($("mm-t"),12,Math.max(40,window.innerHeight*($("mm-b").classList.contains("nofig")?0.16:0.09)));
+  if(!$("mm-b").classList.contains("svg"))fitBox($("mm-f"),12,Math.max(40,window.innerHeight*0.12));
+}
+/* place restante en bas pendant une question : les propositions s’agrandissent */
+FIT.unfill=function(){var c=$("g-choices");if(c)c.style.minHeight="";};
+FIT.fill=function(gap){
+  if(!G||G.phase!=="q"||!$("g-rules").classList.contains("hidden"))return;
+  var c=$("g-choices");if(!c||!c.children.length||!visible(c))return;
+  c.style.minHeight=(c.getBoundingClientRect().height+Math.min(gap,window.innerHeight*0.35))+"px";
+};
+/* barre d’outils du jeu sur une seule ligne : elle rétrécit un peu si la fenêtre est étroite */
+FIT.pre=function(){
+  var t=document.querySelector("#s-game .g-top");if(!t||!visible(t))return;
+  var st=document.documentElement.style,z=1;st.setProperty("--gz","1");
+  var row=function(){var k=[].filter.call(t.children,visible);if(!k.length)return true;var c=function(e){var r=e.getBoundingClientRect();return (r.top+r.bottom)/2;},y=c(k[0]);return k.every(function(e){return Math.abs(c(e)-y)<10;});};
+  while(!row()&&z>0.66){z-=0.06;st.setProperty("--gz",String(z));}
+};

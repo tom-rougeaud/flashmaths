@@ -144,7 +144,7 @@
       <div class="g-host hidden" id="g-host"></div>
       <span class="sp"></span>
       <button type="button" class="btn btn-sm btn-soft" id="g-players"></button>
-      <button type="button" class="btn btn-sm btn-soft" id="g-plus">+30 s</button>
+      <button type="button" class="btn btn-sm btn-soft hidden" id="g-media" title="Afficher la figure ou la formule en plein écran pour la classe"></button><button type="button" class="btn btn-sm btn-soft" id="g-plus">+30 s</button>
       <button type="button" class="btn btn-sm btn-primary" id="g-next"></button>
       <button type="button" class="btn btn-sm btn-soft g-auto" id="g-auto" title="Enchaîner automatiquement 10 s après chaque correction"></button>
       <button type="button" class="btn btn-sm btn-ghost" id="g-short">Écourter</button>
@@ -155,14 +155,16 @@
         <div class="g-timer" id="g-timer"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="tr-bg"/><circle cx="50" cy="50" r="44" class="tr-fg" id="g-ring"/></svg><b id="g-sec">20</b></div>
         <div class="g-meta" id="g-meta"></div>
         <div class="g-q" id="g-q"></div>
+        <div class="g-fig" id="g-fig" title="Cliquer pour agrandir"></div>
         <div class="g-choices" id="g-choices"></div>
         <div class="g-rev hidden" id="g-rev"></div>
       </div>
       <aside class="g-live" id="g-live" aria-live="polite"><div class="gl-h"><span class="gl-bulb" aria-hidden="true"></span><span><b id="gl-n">0</b> <span id="gl-t">réponse</span></span></div><ol class="gl-list" id="gl-list"></ol></aside>
       <div class="g-scene card" id="g-scene"></div>
     </div>
-    <div class="g-rules hidden" id="g-rules"><div class="rules-box" id="rules-box"></div></div>
+    <div class="g-rules hidden" id="g-rules" data-fit><div class="rules-box" id="rules-box"></div></div>
     <div class="g-cd hidden" id="g-cd"><div class="cd-bulbs" id="g-cdb" aria-hidden="true"><i></i><i></i><i></i></div><span id="g-cdt">Prêts ?</span></div>
+    <div class="mm hidden" id="m-media" role="dialog" aria-label="Média agrandi"><div class="mm-h"><span class="mm-n" id="mm-n"></span><button type="button" class="btn btn-soft" id="mm-x">Fermer (Échap)</button></div><div class="mm-b" id="mm-b"><div class="mm-t" id="mm-t"></div><div class="mm-f" id="mm-f"></div></div></div>
   </section>
 
   <!-- ═══ 5. FIN ═══ -->

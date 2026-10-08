@@ -298,6 +298,7 @@ function QX(r,intro,steps,bad,expl,o){
    aucune balise n’est transmise sur le réseau, seulement la description de la figure)
 ═══════════════════════════════════════════════════════════════ */
 var FIGC={v:"#5B55C4",c:"#D9606A",s:"#D59A2E",m:"#2E9E7E",k:"#4A86CF",ink:"#262A4F",g:"#E4E1F7",l:"#EEEBFF"};
+var FIG_N=0;
 var FIG_PAL=["#5B55C4","#D9606A","#D59A2E","#2E9E7E","#4A86CF","#C95B82"];
 function xe(s){return String(s===undefined||s===null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").slice(0,40);}
 function fnum(v){return typeof v==="number"&&isFinite(v)?v:0;}
@@ -383,7 +384,8 @@ function figHtml(fig){
       for(var a2=Math.ceil(xr[0]/stx)*stx;a2<=xr[1]+1e-9;a2+=stx){if(Math.abs(a2-x0)<1e-9&&x0===0)continue;if(x0===0&&y0===0&&Math.abs(a2+stx)<1e-9&&stx*sx<30)continue;if(fig.lx===false)break;if(Math.round(a2/stx)%(fig.ex||1)===0)b+=figT(gx(a2),Math.min(oy+GH+12,gy(y0)+12),f(a2,2),{fs:11,fw:700,halo:1});}
       for(var b2=Math.ceil(yr[0]/sty)*sty;b2<=yr[1]+1e-9;b2+=sty){if(Math.abs(b2-y0)<1e-9&&y0===0)continue;if(x0===0&&y0===0&&Math.abs(b2+sty)<1e-9&&sty*sy<24)continue;if(fig.ly===false)break;if(Math.round(b2/sty)%(fig.ey||1)===0)b+=figT(gx(x0)-7,gy(b2),f(b2,2),{fs:11,fw:700,a:"end",halo:1});}
       if(x0===0&&y0===0)b+=figT(gx(0)-8,Math.min(oy+GH+12,gy(0)+11),"0",{fs:11,fw:700,halo:1});var labs=b.slice(bl);b=b.slice(0,bl);
-      b+='<clipPath id="fgclip"><rect x="'+(ox-2)+'" y="'+(oy-2)+'" width="'+(GW+4)+'" height="'+(GH+4)+'"/></clipPath><g clip-path="url(#fgclip)">';
+      var cid="fgc"+(++FIG_N);   /* identifiant unique : plusieurs repères peuvent cohabiter dans la page */
+      b+='<clipPath id="'+cid+'"><rect x="'+(ox-2)+'" y="'+(oy-2)+'" width="'+(GW+4)+'" height="'+(GH+4)+'"/></clipPath><g clip-path="url(#'+cid+')">';
       (fig.curves||(fig.pts?[fig.pts]:[])).forEach(function(cv,ci){
         var d=cv.map(function(p,pi){return (pi?"L":"M")+rd(gx(p[0]),1)+" "+rd(gy(p[1]),1);}).join("");
         b+='<path d="'+d+'" fill="none" stroke="'+FIG_PAL[ci===0?0:1+ci%5]+'" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>';

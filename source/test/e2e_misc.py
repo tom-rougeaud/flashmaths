@@ -49,7 +49,7 @@ async def main():
                         k={'-':'−'}.get(ch,ch)
                         await st.click('#kpad button[data-key="%s"]'%k)
                     await st.click('#kpad button.ok')
-                else: await st.click('#q-ans .ab[data-k="%d"]'%q['ans'])
+                elif await st.is_visible('#q-ans .ab[data-k="0"]'): await st.click('#q-ans .ab[data-k="%d"]'%q['ans'])
             await p1.wait_for_timeout(1500);print('justes',await p1.evaluate('Object.keys(G.ans).map(function(k){return G.players[k].p+":"+G.ans[k].ok+":"+(G.ans[k].v||"")})'))
             await p1.click('#g-next')
         await p1.wait_for_timeout(1500)

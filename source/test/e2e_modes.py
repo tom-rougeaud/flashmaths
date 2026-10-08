@@ -49,8 +49,9 @@ async def play(prof,studs,tag,shorten_at=None):
                     key={'-':'−'}.get(ch,ch)
                     await s.click('#kpad button[data-key="%s"]'%key)
                 await s.click('#kpad button.ok')
-            else:
+            elif await s.is_visible('#q-ans .ab[data-k="0"]'):
                 await s.click('#q-ans .ab[data-k="%d"]'%(q['ans'] if good else (q['ans']+1)%q['n']))
+            else: print('   (pas de QCM visible :',await s.evaluate('S.screen+" "+(document.querySelector("#q-wid:not(.hidden)")?"tuiles":"")'),')')
         await prof.wait_for_timeout(1800)
         if qi<2: await prof.screenshot(path=OUT+tag+'_rv%d.png'%qi)
         if qi==1: await studs[0].screenshot(path=OUT+tag+'_s_rv.png')
