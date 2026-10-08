@@ -3,7 +3,7 @@
 ═══════════════════════════════════════════════════════════════ */
 var QS=[];
 var CTX={metiers:Object.keys(METIERS)};
-function show(id){["s-pick","s-prev","s-lobby","s-game","s-end"].forEach(function(s){$(s).classList.toggle("hidden",s!==id);});document.body.classList.toggle("ingame",id==="s-game");window.scrollTo(0,0);}
+function show(id){["s-pick","s-prev","s-lobby","s-game","s-end"].forEach(function(s){$(s).classList.toggle("hidden",s!==id);});document.body.classList.toggle("ingame",id==="s-game");window.scrollTo(0,0);fitScreen(id==="s-game",{min:0.55,max:document.body.classList.contains("v-mob")?1.7:2.3});}
 function stripD(s){return String(s||"").replace(/\$/g,"").trim();}
 function qType(q){return qKind(q);}
 function stripQ(q){var o=JSON.parse(JSON.stringify(q));delete o.orig;return o;}

@@ -3,12 +3,12 @@
 ═══════════════════════════════════════════════════════════════ */
 var S={code:"",pid:null,pseudo:"",ch:null,mode:null,phase:null,team:-1,score:0,lb:null,q:null,ans:null,ping:null,timer:null,train:null};
 var SCREENS=["s-code","s-pseudo","s-lobby","s-cd","s-q","s-rv","s-end","s-train","s-carnet"];
-function show(id){SCREENS.forEach(function(s){$(s).classList.toggle("hidden",s!==id);});document.body.classList.toggle("ingame",/^s-(q|rv|cd)$/.test(id));window.scrollTo(0,0);S.screen=id;}
+function show(id){SCREENS.forEach(function(s){$(s).classList.toggle("hidden",s!==id);});var g=/^s-(q|rv|cd)$/.test(id);document.body.classList.toggle("ingame",g);window.scrollTo(0,0);S.screen=id;fitScreen(g,{min:0.6,max:document.body.classList.contains("v-pc")?2.1:1.8});}
 var PREF={view:"mob",sound:false};
 function savePref(){store.set("eleve",PREF);}
 
 /* ─── en-tête ─── */
-function setView(v){PREF.view=v;savePref();document.body.classList.remove("v-mob","v-pc");document.body.classList.add("v-"+v);$$("#vsw button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-v")===v);});}
+function setView(v){PREF.view=v;savePref();document.body.classList.remove("v-mob","v-pc");document.body.classList.add("v-"+v);$$("#vsw button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-v")===v);});if(FIT.on)fitScreen(true,{max:v==="pc"?2.1:1.8});}
 $("vsw").addEventListener("click",function(e){var b=e.target.closest("button");if(b)setView(b.getAttribute("data-v"));});
 $("b-menu").addEventListener("click",function(e){e.stopPropagation();$("menu").classList.toggle("hidden");});
 document.addEventListener("click",function(e){if(!e.target.closest(".menu-w"))$("menu").classList.add("hidden");});
@@ -177,7 +177,7 @@ function onMsg(m){
     case "en":showEnd(m);break;
     case "kick":kicked(m.why==="host"?"Un autre téléphone prof a pris la main.":"Le prof t’a retiré de la salle.");break;
     case "rn":S.pseudo=m.p;var ss=store.get("sess",null);if(ss){ss.pseudo=m.p;store.set("sess",ss);}store.set("pseudo",m.p);toast("Le prof a changé ton nom : « "+m.p+" ».");if(S.screen==="s-lobby")renderLobby();break;
-    case "ru":S.phase="lobby";showRulesCard(m.m,{sm:m.sm,rd:m.rd});break;
+    case "ru":S.phase="lobby";showRulesCard(m.m,{sm:m.sm,rd:m.rd,hd:m.hd,hpen:m.hpen});break;
     case "no":
       if(m.why==="full"){kicked(JOIN_ERR.full);}
       else if(m.why==="pseudo"){leaveRoom(true);gotoPseudo();psErr(JOIN_ERR.pseudo_taken);}
@@ -191,8 +191,9 @@ function onMsg(m){
 
 /* ═══ 3. SALLE D’ATTENTE (glisser son jeton dans une équipe) ═══ */
 var KID_SVG='<svg class="ill" viewBox="0 0 120 120"><circle cx="60" cy="64" r="44" fill="#5B55C4"/><circle cx="44" cy="56" r="10" fill="#fff"/><circle cx="76" cy="56" r="10" fill="#fff"/><circle cx="46" cy="58" r="5" fill="#262A4F"/><circle cx="78" cy="58" r="5" fill="#262A4F"/><path d="M44 80q16 14 32 0" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M30 26l10 12M90 26 80 38M60 12v14" stroke="#EFB443" stroke-width="5" stroke-linecap="round"/></svg>';
+var LOBBY_T=null;
 function renderLobby(){
-  if(DRAGGING)return;
+  if(DRAGGING){clearTimeout(LOBBY_T);LOBBY_T=setTimeout(renderLobby,80);return;}
   var lb=S.lb,n=lb?(lb.pl||[]).length:0;
   $("lb-me").textContent=S.host?"Vous jouez en tant que prof":S.pseudo+" · salle "+S.code;
   $("lb-n").textContent=n+" / "+(lb?lb.mx:30)+" connectés";
@@ -243,6 +244,8 @@ function showQuestion(q,done){
   /* rd : temps de lecture (ms) avant que les propositions s’ouvrent ; start peut donc être dans le futur */
   var rem=q.rem!==undefined?q.rem:q.dur+(q.rd||0),kd=pubKind(q);
   q.start=Date.now()-(q.dur-rem);q.end=q.start+q.dur;
+  /* handicap du prof (Classe VS Prof) : la question s’ouvre plus tard sur son téléphone, sans temps supplémentaire */
+  if(S.host&&q.hd>0)q.start=Math.min(q.end-1000,q.start+q.hd);
   $("q-n").textContent=(q.i+1)+" / "+q.N;
   $("q-sc").textContent=fmtInt(S.score)+" pts";
   $("q-tag").innerHTML=pubTag(q);
@@ -269,7 +272,10 @@ function showQuestion(q,done){
 /* pendant le temps de lecture : énoncé seul, réponses verrouillées */
 function reading(){return !!(S.q&&Date.now()<S.q.start);}
 function setReading(on){
+  var hw=on&&S.host&&S.q&&S.q.hd>0;
   $("q-read").classList.toggle("hidden",!on);
+  $("q-read").lastElementChild.textContent=hw?"Handicap du prof : la question arrive dans un instant…":"Lis bien l’énoncé, les propositions arrivent…";
+  document.querySelector("#s-q .q-card").classList.toggle("reading",!!hw);
   ["q-ans","q-free","q-wid"].forEach(function(id){$(id).classList.toggle("reading",on);});
   if(!on&&S.phase==="q"&&!S.ans&&!S.train&&$("f-in")&&!$("q-free").classList.contains("hidden")&&!isTouch()){try{$("f-in").focus({preventScroll:true});}catch(x){}}
 }

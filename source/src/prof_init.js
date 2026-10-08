@@ -5,6 +5,7 @@ function setView(v){
   P.view=v;document.body.classList.remove("v-proj","v-mob");document.body.classList.add("v-"+v);
   $$("#vsw button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-v")===v);});
   saveSetup();
+  if(FIT.on)fitScreen(true,{max:v==="mob"?1.7:2.3});
 }
 $("vsw").addEventListener("click",function(e){var b=e.target.closest("button");if(b)setView(b.getAttribute("data-v"));});
 function soundBtn(){$("b-sound").innerHTML=P.mute?ICO.mute:ICO.sound;$("b-sound").title=P.mute?"Son coupé":"Son activé";SND.setMute(P.mute);}

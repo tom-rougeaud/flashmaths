@@ -3,7 +3,7 @@
 ═══════════════════════════════════════════════════════════════ */
 function qPayload(q,i){
   var o=qPublic(q);o.t="q";o.i=i;o.N=G.qs.length;o.dur=G.dur;
-  if(G.rd)o.rd=G.rd;if(G.pts==="juste")o.sm="juste";
+  if(G.rd)o.rd=G.rd;if(G.pts==="juste")o.sm="juste";if(G.hd)o.hd=G.hd*1000;
   return o;
 }
 function wideKind(q){var k=qKind(q);return k==="assoc"||k==="ordre"||k==="slider";}
@@ -26,6 +26,7 @@ function startGame(){
   /* mode automatique : activé d’office en « Classe VS Prof », sinon selon le réglage ; modifiable en jeu */
   G.auto=G.mode==="boss"?true:!!P.auto;autoBtn();
   G.pts=P.pts==="juste"?"juste":"vite";G.read=Math.max(0,Math.min(10,+P.read||0));
+  G.hd=G.mode==="boss"?Math.max(0,Math.min(10,+P.hd||0)):0;G.hpen=G.mode==="boss"&&!!P.hpen;
   plist().forEach(function(p){p.score=0;p.ok=0;p.na=0;p.streak=0;p.best=0;p.free=0;p.wire=0;p.fast=0;p.ans={};});
   G.phase="cd";pushLobby();hostPing(false);
   showGameScreen();
@@ -87,7 +88,7 @@ function nextQuestion(){
   $("g-scene").classList.add("small");
   $("g-choices").classList.toggle("veil",G.rd>0);$("g-timer").classList.toggle("read",G.rd>0);
   updateAnswered();
-  send(qPayload(q,G.i));snapshot();
+  send(qPayload(q,G.i));snapshot();fitSoon(0);
   clearInterval(G.tick);G.tick=setInterval(tick,200);tick();
 }
 function remaining(){return G.dur+G.extra-(Date.now()-G.qStart);}
@@ -110,7 +111,7 @@ function updateAnswered(){
   var on=online(),n=on.filter(function(p){return G.ans[p.id];}).length;
   var el=$("g-ans");el.textContent=n+" / "+on.length+" ont répondu";
   el.classList.remove("pulse");void el.offsetWidth;el.classList.add("pulse");
-  if(G.phase==="q"&&P.early!==false&&on.length&&n>=on.length&&!G.earlyT)G.earlyT=setTimeout(function(){G.earlyT=null;if(G.phase==="q")reveal();},900);
+  if(G.phase==="q"&&P.early!==false&&on.length&&n>=on.length&&!(G.mode==="boss"&&G.host&&G.host.on&&!G.hostAns)&&!G.earlyT)G.earlyT=setTimeout(function(){G.earlyT=null;if(G.phase==="q")reveal();},900);
 }
 function recvAnswer(p,m){
   if(G.phase!=="q"||m.i!==G.i||G.ans[p.id])return;
@@ -190,14 +191,16 @@ function reveal(){
     boost=tPts.map(function(tp,k){var g=tp.n?Math.round(tp.s/tp.n)+(tp.all&&tp.n>=2?200:0):0;G.tscore[k]+=g;return g;});
   }
   if(G.mode==="boss"){
-    var n=G.qs.length,b=G.boss,D=100/(n*0.75);
-    /* équilibre : à réussite égale, le prof perd 1,5 fois plus de vie que la classe
-       (bonne réponse de la classe = D × 1,5 au prof ; erreur = D à la classe) */
-    var toProf=D*rate*1.5*(rate===1?1.5:1),toClass=D*(1-rate);
-    /* téléphone du prof : juste = il inflige des dégâts à la jauge de la classe ; faux ou silence = sa jauge baisse (×1,5) */
-    var ha=G.hostAns,hostOn=G.host&&G.host.on;
-    if(ha&&ha.ok){var sp=clamp(1-ha.t/lim,0,1);toClass+=D*0.35*(0.6+0.4*sp);}
-    else if(hostOn||ha){toProf+=D*0.35*1.5;}
+    var n=G.qs.length,b=G.boss,K=100/n;
+    /* v3.5 : équilibre réglé pour qu’une classe à environ 70 % de réussite fasse jeu égal avec un prof
+       qui répond juste et vite sur son téléphone (les handicaps du prof font pencher la balance vers la classe).
+       Classe → prof : K × réussite × 1,2 (coup critique ×1,25 à 100 %).
+       Erreurs de la classe → classe : K × échecs × 0,6 si le prof joue sur son téléphone, × 1,4 sinon.
+       Prof juste → classe : K × 0,9 × (0,5 + 0,5 × rapidité). */
+    var ha=G.hostAns,hostOn=!!(G.host&&G.host.on)||!!ha;
+    var toProf=K*rate*1.2*(rate===1?1.25:1),toClass=K*(1-rate)*(hostOn?0.6:1.4);
+    if(ha&&ha.ok){var sp=clamp(1-ha.t/lim,0,1);toClass+=K*0.9*(0.5+0.5*sp);}
+    else if(hostOn&&G.hpen){toProf+=K*0.5;}
     toProf=Math.round(toProf*10)/10;toClass=Math.round(toClass*10)/10;
     if(b.pp<=0)toProf=0;if(b.pc<=0)toClass=0;
     b.pp=Math.max(0,b.pp-toProf);b.pc=Math.max(0,b.pc-toClass);
@@ -266,6 +269,7 @@ function renderReveal(h,boost,dmg){
   $("g-next").innerHTML=ICO.next+(last?"Voir les gagnants":"Question suivante");$("g-plus").disabled=true;
   updateAnswered();
   if(G.auto)startAuto();
+  fitSoon(0);
 }
 function startAuto(){
   clearInterval(G.autoT);
@@ -361,9 +365,9 @@ function showRules(cb){
   var box=$("rules-box");
   $("g-qn").textContent="Question 1 / "+G.qs.length;$("g-q").innerHTML="";$("g-choices").innerHTML="";$("g-meta").innerHTML="";$("g-rev").classList.add("hidden");
   $("g-timer").classList.add("hidden");$("g-next").innerHTML=ICO.play+"Démarrer";$("g-ans").textContent="";
-  box.innerHTML=rulesHtml(G.mode,{sm:G.pts,rd:G.read})+'<div class="rules-act"><button type="button" class="btn btn-ghost" id="ru-back">Retour à la salle</button><button type="button" class="btn btn-go btn-xl" id="ru-go">'+ICO.play+"C’est parti !</button></div>";
+  box.innerHTML=rulesHtml(G.mode,{sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen})+'<div class="rules-act"><button type="button" class="btn btn-ghost" id="ru-back">Retour à la salle</button><button type="button" class="btn btn-go btn-xl" id="ru-go">'+ICO.play+"C’est parti !</button></div>";
   $("g-rules").classList.remove("hidden");
-  send({t:"ru",m:G.mode,sm:G.pts,rd:G.read});
+  send({t:"ru",m:G.mode,sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen?1:0});
   $("ru-go").onclick=function(){$("g-rules").classList.add("hidden");cb();};
   $("ru-back").onclick=function(){$("g-rules").classList.add("hidden");G.phase="lobby";G.lk=false;pushLobby();renderLobby();show("s-lobby");};
 }

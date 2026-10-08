@@ -161,10 +161,13 @@ body.v-mob .lobby{grid-template-columns:1fr}
 .g-qn{font-weight:900;font-size:1.2rem;background:#fff;border-radius:999px;padding:.4rem 1rem;box-shadow:var(--sh)}
 .g-ans{font-weight:900;color:var(--violet-d);background:var(--violet-l);border-radius:999px;padding:.4rem 1rem}
 .g-ans.pulse{animation:popin .35s}
-.g-stage{display:grid;grid-template-columns:minmax(0,1fr) 15.5rem;grid-template-areas:"q live" "scene live";gap:1rem;align-items:start}
+.g-stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(12rem,19%);grid-template-areas:"q live" "scene live";gap:1rem;align-items:stretch}
+.g-qbox,.g-scene{align-self:start}
 .g-qbox{grid-area:q}.g-scene{grid-area:scene}
 /* colonne en direct : chaque réponse allume une ampoule avec le prénom (couleur de l’équipe en duel) */
-.g-live{grid-area:live;position:sticky;top:4.6rem;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:.8rem .7rem;max-height:calc(100vh - 6rem);overflow:auto;box-shadow:var(--sh)}
+/* la colonne ne fait jamais grandir la page : sa liste défile à l’intérieur de la hauteur de la question */
+.g-live{grid-area:live;position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:.8rem .7rem;box-shadow:var(--sh);min-height:12rem;overflow:hidden}
+.g-live .gl-list{position:absolute;top:3.4rem;left:.7rem;right:.7rem;bottom:.7rem;overflow-y:auto;align-content:start}
 .gl-h{display:flex;align-items:center;gap:.55rem;font-weight:800;color:var(--ink2);margin:0 .2rem .55rem}
 .gl-h b{font-size:1.6rem;color:var(--ink);font-weight:900}
 .gl-bulb{width:1.5rem;height:1.5rem;border-radius:50%;background:#E9EAF2;box-shadow:inset 0 -3px 0 rgba(0,0,0,.06);flex:none}
@@ -180,7 +183,8 @@ body.v-mob .lobby{grid-template-columns:1fr}
 .g-live.two .gl-list li{font-size:.88rem}
 @keyframes glin{0%{transform:translateX(18px);opacity:0}100%{transform:none;opacity:1}}
 body.v-mob .g-stage{grid-template-columns:1fr;grid-template-areas:"q" "live" "scene"}
-body.v-mob .g-live{position:static;max-height:none;padding:.6rem}
+body.v-mob .g-live{position:static;max-height:none;padding:.6rem;min-height:0}
+body.v-mob .g-live .gl-list{position:static;max-height:7.5rem}
 body.v-mob .gl-list,body.v-mob .g-live.two .gl-list{display:flex;flex-direction:row;flex-wrap:wrap}
 body.v-mob .gl-list li{font-size:.85rem}
 .g-qbox{position:relative;padding:1.4rem 1.6rem;min-height:18rem}
@@ -452,3 +456,11 @@ button.jc-qr{border:0;cursor:zoom-in}
 body.v-mob .g-choices.veil:after{font-size:1.1rem}
 .g-timer.read .tr-fg{stroke:var(--sun)}
 .g-timer.read b{color:var(--sun-d)}
+
+/* v3.5 : écran de jeu en pleine largeur (la taille s’ajuste automatiquement à la fenêtre) */
+body.ingame #app{max-width:min(98vw,2200px);padding:.5rem 1rem .6rem}
+body.ingame.v-mob #app{max-width:none;padding:.4rem .5rem .5rem}
+body.ingame .g-top{margin-bottom:.6rem}
+body.ingame .g-qbox{min-height:0}
+
+body.ingame .top{zoom:calc(1 / var(--fit,1))}

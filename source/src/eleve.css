@@ -226,3 +226,11 @@ body.v-pc .wsl-v{font-size:2.6rem}
 .wk b{white-space:nowrap}
 .chip-btn{border:0;cursor:pointer;background:var(--coral-l);color:#B3262B;font-weight:900}
 .me-bar{flex-wrap:wrap}
+
+/* v3.5 : écrans de jeu ajustés à la fenêtre (la taille du texte est calculée pour tout faire tenir sans défiler) */
+body.ingame #app{min-height:0;max-width:min(100%,1500px);padding:.5rem .7rem .6rem}
+body.ingame .sent{position:fixed;left:50%;bottom:max(.8rem,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:80;margin:0;width:min(92vw,30rem);box-shadow:var(--sh-lg);font-size:1rem;padding:.6rem .9rem}
+body.ingame .q-card{margin-bottom:.6rem}
+body.ingame .fig{max-width:min(100%,34rem)}
+
+body.ingame .top{zoom:calc(1 / var(--fit,1))}

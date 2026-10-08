@@ -28,6 +28,14 @@ Le prof règle la partie, choisit des notions dans le programme de son niveau, v
   <img src="readme-eleve.png" alt="Sur le téléphone : temps de lecture, réponse, guirlande de fin" width="760">
 </p>
 
+## Nouveautés de la version 3.5
+
+- **Plein écran automatique** : sur téléphone, tablette, PC et au tableau, la question s’agrandit pour remplir l’écran, sans défilement et sans déformer les figures.
+- **Figures plus lisibles** : graduations et légendes ne se chevauchent plus et ne débordent plus des repères.
+- **Équipes** : le prof peut renommer une équipe pendant que les élèves arrivent, et son glisser-déposer s’affiche aussitôt au tableau comme sur les téléphones.
+- **Tableau élargi** en mode PC, la colonne des prénoms gardant sa largeur.
+- **La Classe VS le Prof rééquilibré**, avec des **handicaps du prof** au choix : question affichée 3, 5 ou 10 s plus tard sur son téléphone, erreurs plus coûteuses.
+
 ## Nouveautés de la version 3.4
 
 - **Plus de variété** : chaque notion propose plusieurs façons d’être interrogée (calcul direct ou inverse, situation professionnelle, lecture de figure, estimation au curseur, étape fausse, tuiles, remise en ordre). Aucune notion n’a plus une seule forme d’énoncé.
@@ -54,7 +62,7 @@ Le prof règle la partie, choisit des notions dans le programme de son niveau, v
 |---|---|---|
 | **Un contre tous** | Chacun joue pour soi | Top 5 en direct, guirlande des 3 meilleurs |
 | **Duel d’équipes** | Les élèves glissent leur prénom dans une équipe | Course de fusées, guirlande des équipes |
-| **La Classe VS le Prof** | Les bonnes réponses infligent des dégâts à la jauge de vie du prof (×1,5), les erreurs à celle de la classe | Combat avec jauges de vie |
+| **La Classe VS le Prof** | Les bonnes réponses de la classe infligent des dégâts à la jauge de vie du prof, celles du prof (sur son téléphone, avec un handicap au choix) à celle de la classe | Combat avec jauges de vie |
 
 **Côté élève**
 - Code, prénom (ou pseudo au hasard), et c’est parti. Les noms grossiers sont refusés.

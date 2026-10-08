@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    PAGE PROF — 1. Choisir les notions et régler la partie
 ═══════════════════════════════════════════════════════════════ */
-var P={lvl:"all",sel:[],mode:"duel",nq:10,dur:0,ord:"rand",fmt:"mix",nt:2,tnames:null,hide:false,auto:false,early:true,names:true,view:null,mute:false,vary:true,est:true,read:3,pts:"vite"};
+var P={lvl:"all",sel:[],mode:"duel",nq:10,dur:0,ord:"rand",fmt:"mix",nt:2,tnames:null,hide:false,auto:false,early:true,names:true,view:null,mute:false,vary:true,est:true,read:3,pts:"vite",hd:3,hpen:false};
 function loadSetup(){var s=store.get("prof",null);if(s&&typeof s==="object")for(var k in P)if(s[k]!==undefined)P[k]=s[k];P.sel=(P.sel||[]).filter(function(id){return !!ITEM_BY_ID[id];});}
 function saveSetup(){store.set("prof",P);}
 function teamNames(){var a=P.tnames&&P.tnames.length?P.tnames:[];return TEAMS.map(function(t,i){return a[i]||t.n;});}
@@ -11,6 +11,7 @@ var NQS=[5,10,15,20];
 var ORDS=[["rand","Mélangé"],["prog","Progressif"]];
 var FMTS=[["qcm","QCM"],["mix","Mixte"],["libre","Saisie libre"]];
 var READS=[[0,"Aucun"],[3,"3 s"],[5,"5 s"]];
+var HDS=[[0,"Aucun"],[3,"+3 s"],[5,"+5 s"],[10,"+10 s"]];
 var PTSM=[["vite","Justesse et rapidité"],["juste","Justesse seule"]];
 var OPEN_CH={};      /* chapitres et sous-chapitres ouverts */
 var TREE_SEL={};     /* clé de chapitre ou sous-chapitre → notions affichées */
@@ -156,12 +157,13 @@ function renderSettings(){
   $("seg-pts").innerHTML=segHtml(PTSM,P.pts);
   $("seg-nt").innerHTML=segHtml([2,3,4,5,6],P.nt);
   $("w-teams").classList.toggle("hidden",P.mode!=="duel");
+  $("w-boss").classList.toggle("hidden",P.mode!=="boss");$("seg-hd").innerHTML=segHtml(HDS,P.hd);$("o-hpen").checked=!!P.hpen;
   $("o-hide").checked=!!P.hide;$("o-auto").checked=!!P.auto;$("o-early").checked=P.early!==false;$("o-names").checked=P.names!==false;
   $("o-vary").checked=P.vary!==false;$("o-est").checked=P.est!==false;
   updateSel();
 }
 $("modes").addEventListener("click",function(e){var b=e.target.closest(".mode");if(!b)return;P.mode=b.getAttribute("data-m");saveSetup();renderSettings();});
-[["seg-nq","nq",true],["seg-dur","dur",true],["seg-ord","ord",false],["seg-fmt","fmt",false],["seg-nt","nt",true],["seg-read","read",true],["seg-pts","pts",false]].forEach(function(x){
+[["seg-nq","nq",true],["seg-dur","dur",true],["seg-ord","ord",false],["seg-fmt","fmt",false],["seg-nt","nt",true],["seg-read","read",true],["seg-pts","pts",false],["seg-hd","hd",true]].forEach(function(x){
   $(x[0]).addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var v=b.getAttribute("data-v");P[x[1]]=x[2]?+v:v;saveSetup();renderSettings();});
 });
 $("o-hide").addEventListener("change",function(){P.hide=this.checked;saveSetup();});
@@ -170,6 +172,7 @@ $("o-early").addEventListener("change",function(){P.early=this.checked;saveSetup
 $("o-names").addEventListener("change",function(){P.names=this.checked;saveSetup();});
 $("o-vary").addEventListener("change",function(){P.vary=this.checked;saveSetup();});
 $("o-est").addEventListener("change",function(){P.est=this.checked;saveSetup();});
+$("o-hpen").addEventListener("change",function(){P.hpen=this.checked;saveSetup();});
 
 /* ═══ IMPORT DE QUESTIONS (texte avec « * ») ═══ */
 function nivChecks(host,sel){

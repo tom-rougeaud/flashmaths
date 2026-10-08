@@ -166,8 +166,14 @@ function chip(p,kick){
   var T=teamOf(p);
   return '<span class="pchip'+(p.on?"":" off")+(p.away?" away":"")+'" data-id="'+esc(p.id)+'" style="--tl:'+(T?T.l:"#EEEBFF")+'"'+(p.away?' title="A quitté la page du jeu"':"")+'>'+(p.away?"⚠ ":"")+esc(p.p)+(kick?'<button type="button" data-kick="'+esc(p.id)+'" title="Retirer de la salle" aria-label="Retirer '+esc(p.p)+'">✕</button>':"")+"</span>";
 }
+var LOBBY_T=null;
 function renderLobby(){
-  if(!G||DRAGGING)return;
+  if(!G)return;
+  /* pendant un glisser-déposer, on rafraîchit juste après (sinon le déplacement ne s’affiche pas côté prof) */
+  if(DRAGGING){clearTimeout(LOBBY_T);LOBBY_T=setTimeout(renderLobby,80);return;}
+  /* un nom d’équipe en cours d’édition est conservé (valeur, curseur) même si un élève arrive ou change d’équipe */
+  var ed=document.activeElement&&document.activeElement.matches&&document.activeElement.matches("#lb-zone [data-tn]")?document.activeElement:null;
+  var edK=ed?ed.getAttribute("data-tn"):null,edV=ed?ed.value:"",edS=ed?ed.selectionStart:0,edE=ed?ed.selectionEnd:0;
   var ps=plist().sort(function(a,b){return a.joined-b.joined;}),n=ps.filter(function(p){return p.on;}).length;
   $("lb-n").textContent=n;
   var h="",tools="";
@@ -188,12 +194,19 @@ function renderLobby(){
   }
   $("lb-tools").innerHTML=tools;
   $("lb-zone").innerHTML=h;
+  if(edK!==null){var ni=$("lb-zone").querySelector('[data-tn="'+edK+'"]');if(ni){ni.value=edV;ni.focus({preventScroll:true});try{ni.setSelectionRange(edS,edE);}catch(x){}}}
   $("lb-start").disabled=!n;
   $("lb-start").innerHTML=ICO.play+(G.phase==="lobby"?"Lancer la partie":"Reprendre");
   $("lb-hostcode").classList.toggle("hidden",G.mode!=="boss");
   $("lb-players").innerHTML=ICO.users+"Gérer les joueurs ("+n+")";
 }
 $("lb-zone").addEventListener("click",function(e){var k=e.target.closest("[data-kick]");if(k)kickPlayer(k.getAttribute("data-kick"));});
+function applyTeamName(i){
+  var k=+i.getAttribute("data-tn");if(!G||!G.teams[k])return;
+  var v=i.value.replace(/[<>]/g,"").trim().slice(0,22);if(!v)return;
+  G.teams[k].n=v;var tn=teamNames();tn[k]=v;P.tnames=tn;saveSetup();pushLobby();
+}
+$("lb-zone").addEventListener("input",function(e){var i=e.target.closest("[data-tn]");if(i)applyTeamName(i);});
 $("lb-zone").addEventListener("change",function(e){
   var i=e.target.closest("[data-tn]");if(!i)return;
   var k=+i.getAttribute("data-tn"),v=i.value.replace(/[<>]/g,"").trim().slice(0,22)||TEAMS[k].n;

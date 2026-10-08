@@ -21,7 +21,7 @@
   --fz:1;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{font-size:calc(16px * var(--fz));-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{font-size:calc(16px * var(--fz) * var(--fit,1));-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{margin:0;min-height:100%}
 body{font-family:var(--f);font-weight:600;color:var(--ink);line-height:1.4;background-color:var(--bg);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;background-attachment:fixed;font-variant-numeric:tabular-nums}

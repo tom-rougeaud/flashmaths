@@ -5,7 +5,7 @@
    Les textes français utilisent l’apostrophe typographique ’.
 ═══════════════════════════════════════════════════════════════ */
 "use strict";
-var FM_VERSION="3.4";
+var FM_VERSION="3.5";
 function $(id){return document.getElementById(id);}
 function $$(sel,root){return [].slice.call((root||document).querySelectorAll(sel));}
 function esc(s){return String(s===undefined||s===null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -110,7 +110,7 @@ var RULES={
   common:[["bolt","De 500 à 1 000 points par bonne réponse : plus on répond vite, plus on gagne."],["flame","Série : +50 points par bonne réponse d’affilée (jusqu’à +250)."],["keyb","Saisie libre au clavier : points ×1,5. Toutes les écritures équivalentes sont acceptées."],["tiles","Tuiles à associer ou à remettre dans l’ordre : points partiels si une partie est juste."],["target","Estimation au curseur : zone verte = tous les points, zone orange = la moitié."],["cross","Erreur ou pas de réponse : 0 point, mais aucune pénalité."]],
   solo:[["user","Chacun joue pour soi, sans équipe."],["trophy","Le classement change à chaque question ; à la fin, les 3 meilleurs allument la guirlande."]],
   duel:[["users","Points de l’équipe à chaque question = moyenne des points de ses membres (un membre qui ne répond pas compte 0)."],["star","Bonus de 200 points si tous les membres de l’équipe trouvent la bonne réponse."],["rocket","Les fusées avancent : l’équipe en tête à la fin gagne."]],
-  boss:[["heart","La classe et le prof ont chacun 100 points de vie."],["star","Chaque bonne réponse de la classe inflige des dégâts à la jauge de vie du prof : il encaisse 1,5 fois plus que la classe (100 % de réussite = coup critique ×1,5)."],["bolt","Les erreurs et les absences de réponse infligent des dégâts à la jauge de vie de la classe."],["shield","Le prof répond aussi sur son téléphone : s’il trouve, il inflige des dégâts à la jauge de vie de la classe ; s’il se trompe, sa propre jauge baisse."],["trophy","À la fin, le camp qui a gardé le plus de vie gagne."]]
+  boss:[["heart","La classe et le prof ont chacun 100 points de vie."],["star","Plus la classe réussit, plus elle inflige de dégâts à la jauge de vie du prof (100 % de réussite = coup critique)."],["bolt","Les erreurs et les absences de réponse de la classe abîment sa propre jauge."],["shield","Le prof répond aussi sur son téléphone : s’il trouve, et vite, il inflige des dégâts à la jauge de vie de la classe."],["trophy","À la fin, le camp qui a gardé le plus de vie gagne."]]
 };
 /* o = {sm:"juste"|"vite", rd:secondes de lecture} (réglages de la partie) */
 function rulesHtml(mode,o){
@@ -119,7 +119,12 @@ function rulesHtml(mode,o){
   var com=RULES.common.slice();
   if(o.sm==="juste")com[0]=["check","1 000 points par bonne réponse, quelle que soit la vitesse : prends le temps de bien réfléchir."];
   if(o.rd>0)com.splice(1,0,["eye","Les propositions apparaissent après "+o.rd+" secondes : lis bien l’énoncé d’abord."]);
-  return '<div class="rules-mode">'+esc(M.nom)+'</div><h2>Les règles</h2><div class="rules-cols"><div><h3>Ce mode</h3><ul>'+RULES[mode].map(li).join("")+'</ul></div><div><h3>Les points</h3><ul>'+com.map(li).join("")+"</ul></div></div>";
+  var R=RULES[mode].slice();
+  if(mode==="boss"){
+    if(o.hd>0)R.splice(R.length-1,0,["clock","Handicap du prof : la question s’affiche sur son téléphone "+o.hd+" s après les vôtres."]);
+    if(o.hpen)R.splice(R.length-1,0,["heart","Handicap du prof : chaque erreur (ou absence de réponse) du prof abîme sa propre jauge."]);
+  }
+  return '<div class="rules-mode">'+esc(M.nom)+'</div><h2>Les règles</h2><div class="rules-cols"><div><h3>Ce mode</h3><ul>'+R.map(li).join("")+'</ul></div><div><h3>Les points</h3><ul>'+com.map(li).join("")+"</ul></div></div>";
 }
 
 
@@ -149,13 +154,47 @@ function checkPseudo(raw){
 /* ─── Zoom A− / A+ (taille du texte de toute la page) ─── */
 function initZoom(key,host){
   var z=store.get("zoom_"+key,1);
-  function apply(){z=clamp(Math.round(z*10)/10,0.7,1.8);document.documentElement.style.setProperty("--fz",z);store.set("zoom_"+key,z);var s=host&&host.querySelector("span");if(s)s.textContent=Math.round(z*100)+" %";}
+  function apply(){z=clamp(Math.round(z*10)/10,0.7,1.8);document.documentElement.style.setProperty("--fz",z);store.set("zoom_"+key,z);var s=host&&host.querySelector("span");if(s)s.textContent=Math.round(z*100)+" %";if(typeof FIT!=="undefined"&&FIT.on){FIT.max=FIT.base*z;fitSoon(0);}}
   if(host){
     host.innerHTML='<button type="button" data-z="-1" title="Réduire le texte" aria-label="Réduire le texte">A−</button><span>100 %</span><button type="button" data-z="1" title="Agrandir le texte" aria-label="Agrandir le texte">A+</button>';
     host.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;z+=0.1*(+b.getAttribute("data-z"));apply();});
   }
   apply();
 }
+
+/* ─── Ajustement automatique des écrans de jeu (v3.5) ───
+   Pendant une question ou une correction, la taille de base (rem) est cherchée par dichotomie
+   pour que le contenu occupe toute la fenêtre, sans défilement ni débordement horizontal.
+   Les figures (SVG à viewBox) et tous les blocs étant en rem, tout grandit ou rétrécit ensemble,
+   sans déformation. Le zoom A− / A+ règle la taille maximale autorisée. */
+var FIT={on:false,min:0.6,max:1.9,base:1.9,T:null,busy:false};
+function fitSet(f){document.documentElement.style.setProperty("--fit",String(Math.round(f*1000)/1000));}
+function fitOverflows(){
+  var d=document.documentElement,b=document.body,h=window.innerHeight,w=d.clientWidth||window.innerWidth;
+  return Math.max(d.scrollHeight,b.scrollHeight)>h+1||Math.max(d.scrollWidth,b.scrollWidth)>w+1;
+}
+function fitNow(){
+  clearTimeout(FIT.T);
+  if(!FIT.on){fitSet(1);return;}
+  if(FIT.busy)return;FIT.busy=true;
+  var lo=FIT.min,hi=Math.max(FIT.min,FIT.max),best=lo,sy=window.scrollY;
+  fitSet(hi);
+  if(!fitOverflows())best=hi;
+  else for(var i=0;i<9;i++){var mid=(lo+hi)/2;fitSet(mid);if(fitOverflows())hi=mid;else{lo=mid;best=mid;}}
+  fitSet(best*0.985);window.scrollTo(0,sy);FIT.busy=false;
+}
+function fitSoon(ms){clearTimeout(FIT.T);FIT.T=setTimeout(fitNow,ms===undefined?30:ms);clearTimeout(FIT.T2);FIT.T2=setTimeout(function(){if(FIT.on)fitNow();},850);}
+/* on = écran de jeu affiché ; o = {min, max} */
+function fitScreen(on,o){
+  FIT.on=!!on;if(o){if(o.min)FIT.min=o.min;if(o.max)FIT.base=o.max;}
+  var z=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--fz"))||1;FIT.max=FIT.base*z;
+  if(!on){fitSet(1);return;}
+  fitNow();fitSoon(250);
+  clearTimeout(FIT.T2);FIT.T2=setTimeout(function(){if(FIT.on)fitNow();},850);   /* après les animations (secousse, apparition) */
+}
+window.addEventListener("resize",function(){if(FIT.on)fitSoon(120);});
+window.addEventListener("orientationchange",function(){if(FIT.on)fitSoon(300);});
+try{if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(FIT.on)fitSoon(0);});}catch(e){}
 
 /* ─── Fenêtres, messages ─── */
 function openModal(id){var m=$(id);if(!m)return;m.classList.remove("hidden");var f=m.querySelector("[autofocus]");if(f)setTimeout(function(){f.focus();},50);}

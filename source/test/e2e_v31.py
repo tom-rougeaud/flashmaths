@@ -71,7 +71,7 @@ async def main():
                 if await s.is_visible('#q-free'):
                     txt=(('%g'%q['num']).replace('.',',') if q['num'] is not None else q['shown'].replace('$','').replace(' ','')) if good else '999'
                     await s.click('#f-in');await s.keyboard.type(txt.replace('-','-'));await s.keyboard.press('Enter')
-                else:
+                elif await s.is_visible('#q-ans .ab[data-k="0"]'):
                     await s.click('#q-ans .ab[data-k="%d"]'%(q['ans'] if good else (q['ans']+1)%q['n']))
             await prof.wait_for_timeout(1900)
             await prof.screenshot(path=OUT+'p_rv%d.png'%qi)
