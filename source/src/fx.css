@@ -10,7 +10,7 @@
 @keyframes flm{from{transform:scaleX(.7)}to{transform:scaleX(1.15)}}
 .rocket.boost .flm{animation:flmb .15s 8 alternate}
 @keyframes flmb{from{transform:scaleX(1.2)}to{transform:scaleX(2)}}
-.rk-sc{position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:.2rem;background:#fff;border-radius:999px;padding:.1rem .5rem;font-weight:900;font-size:.85rem;box-shadow:0 2px 6px rgba(0,0,0,.12);white-space:nowrap}
+.rk-sc{position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:.2rem;background:var(--card);border-radius:999px;padding:.1rem .5rem;font-weight:900;font-size:.85rem;box-shadow:0 2px 6px rgba(0,0,0,.12);white-space:nowrap}
 .lane.lead .rk-sc{background:var(--sun);color:#3A2A00}
 
 .arena{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:1rem;padding:.5rem 1rem 0;min-height:15rem}
@@ -37,7 +37,7 @@
 .boss-ko:not(.hidden){animation:spin 1s linear infinite;transform-origin:80px 72px}
 
 .leader{display:flex;flex-direction:column;gap:.45rem}
-.lrow{display:grid;grid-template-columns:2.4rem minmax(6rem,12rem) 2.6rem 1fr auto;align-items:center;gap:.6rem;background:#fff;border-radius:16px;padding:.45rem .8rem;box-shadow:0 3px 10px rgba(38,42,79,.08);animation:drop .5s both}
+.lrow{display:grid;grid-template-columns:2.4rem minmax(6rem,12rem) 2.6rem 1fr auto;align-items:center;gap:.6rem;background:var(--card);border-radius:16px;padding:.45rem .8rem;box-shadow:0 3px 10px rgba(38,42,79,.08);animation:drop .5s both}
 .lrow.first{background:linear-gradient(90deg,#FFF3D6,#fff)}
 .lrk{width:2.2rem;height:2.2rem;border-radius:50%;background:var(--violet);color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center}
 .lrow.first .lrk{background:var(--sun);color:#3A2A00}

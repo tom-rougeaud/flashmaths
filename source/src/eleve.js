@@ -275,7 +275,7 @@ function showQuestion(q,done){
   if(S.host&&q.hd>0)q.start=Math.min(q.end-1000,q.start+q.hd);
   $("q-n").textContent=(q.i+1)+" / "+q.N;
   $("q-sc").textContent=fmtInt(S.score)+" pts";
-  $("q-tag").innerHTML=pubTag(q);
+  $("q-tag").innerHTML=pubTag(q);$("q-notion").innerHTML=notionHtml(q);
   $("q-txt").innerHTML='<div class="q-st">'+rt(q.q)+"</div>"+figBlock(q.fig);
   $("q-txt").classList.toggle("hasfig",!!q.fig&&!!figHtml(q.fig));
   $("q-sent").classList.add("hidden");$("q-sent").classList.remove("late");

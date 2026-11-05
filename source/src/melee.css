@@ -1,7 +1,7 @@
 /* ═══ Mêlée entre amis (sans MJ) ═══ */
 .mel-inv{display:grid;grid-template-columns:7.5rem 1fr;gap:.9rem;align-items:center;margin-bottom:.8rem}
 .mel-inv h2{font-size:1.2rem;margin:0 0 .25rem}
-.mel-qr{width:7.5rem;height:7.5rem;background:#fff;border-radius:14px;padding:.4rem;cursor:pointer;box-shadow:var(--sh)}
+.mel-qr{width:7.5rem;height:7.5rem;background:var(--card);border-radius:14px;padding:.4rem;cursor:pointer;box-shadow:var(--sh)}
 .mel-qr svg{width:100%;height:100%;display:block}
 .mel-code{font-size:1.15rem;letter-spacing:.12em;color:var(--ink)}
 .mel-me,.mel-pl,.mel-pk{margin-bottom:.8rem}
@@ -40,7 +40,7 @@ details.mel-roy{margin:.35rem 0}
 .mel-qrbig{position:fixed;top:0;right:0;bottom:0;left:0;z-index:200;background:rgba(34,30,79,.85);display:grid;place-items:center;padding:1rem}
 .mel-qrbig.hidden{display:none}
 .mq-card{background:var(--card);border-radius:24px;padding:1.2rem;text-align:center;max-width:26rem;width:100%;box-shadow:var(--sh-lg)}
-.mq-q{background:#fff;border-radius:16px;padding:.8rem;margin:0 auto .6rem;width:min(78vw,22rem)}
+.mq-q{background:var(--card);border-radius:16px;padding:.8rem;margin:0 auto .6rem;width:min(78vw,22rem)}
 .mq-q svg{width:100%;display:block}
 .mq-c{font-size:2.6rem;font-weight:900;letter-spacing:.18em;margin:.2rem 0}
 .mq-card .btn{margin-top:.8rem}

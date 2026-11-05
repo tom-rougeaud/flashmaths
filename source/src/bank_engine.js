@@ -336,6 +336,19 @@ function fmtAllowed(q,fk){
   if(k==="qcm")return fk.indexOf("qcm")>=0||(fk.indexOf("libre")>=0&&isFree(q))||(fk.indexOf("slider")>=0&&!!q.est);
   return fk.indexOf(k)>=0;
 }
+/* v4.1 : la notion (chapitre › item) de la question, affichée à chaque question */
+function notionOf(q){
+  var it=q&&q.id&&ITEM_BY_ID[q.id];
+  if(it)return {ch:it.chap||"",ti:it.titre||""};
+  if(q&&q.titre)return {ch:q.chap||"",ti:q.titre};
+  if(q&&q.nt)return {ch:q.nt[0]||"",ti:q.nt[1]||""};
+  return {ch:"",ti:"Question du prof"};
+}
+function notionHtml(q){
+  var n=notionOf(q);if(!n.ti&&!n.ch)return "";
+  var esc2=function(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+  return '<span class="nt">'+(n.ch&&n.ch!==n.ti?"<small>"+esc2(n.ch)+"</small>":"")+"<b>"+esc2(n.ti)+"</b></span>";
+}
 function kindTagHtml(q){
   var k=qKind(q),t=KIND_TAG[k]||(q.sub&&k==="qcm"?KIND_TAG[q.sub]:null),h=t?'<span class="tag '+t[1]+'">'+t[0]+"</span>":"";
   if(q.qx)h+='<span class="tag t-coral">Trouve l’erreur</span>';
@@ -358,6 +371,7 @@ function answerText(q){
 function qPublic(q){
   var k=qKind(q),o={q:q.q,kd:k};
   if(q.id&&ITEM_BY_ID[q.id]&&!ITEM_BY_ID[q.id].custom)o.id=q.id;
+  var nt=notionOf(q);o.nt=[nt.ch,nt.ti];
   if(q.fig)o.fig=q.fig;
   if(q.qx)o.qx=1;
   if(q.sub)o.sb=q.sub;
@@ -419,4 +433,4 @@ function qCorr(q){
   return null;
 }
 
-if(typeof module!=="undefined")module.exports={fmtKey:fmtKey,fmtAllowed:fmtAllowed,FMT_KEYS:FMT_KEYS,qShape:qShape,normHist:normHist,judge:judge,isFree:isFree,answerText:answerText,qPublic:qPublic,qKind:qKind,qCorr:qCorr,toSlider:toSlider,figHtml:figHtml,QE:QE,mulberry32:mulberry32,BANK:BANK,NIVEAUX:NIVEAUX,METIERS:METIERS,ERR:ERR,makeQuestion:makeQuestion,drawQuestions:drawQuestions,buildTree:buildTree,ITEM_BY_ID:ITEM_BY_ID,f:f,checkTyped:checkTyped,parseNumber:parseNumber,parseExpr:parseExpr,isFree:isFree,dureeQuestion:dureeQuestion};
+if(typeof module!=="undefined")module.exports={notionOf:notionOf,notionHtml:notionHtml,fmtKey:fmtKey,fmtAllowed:fmtAllowed,FMT_KEYS:FMT_KEYS,qShape:qShape,normHist:normHist,judge:judge,isFree:isFree,answerText:answerText,qPublic:qPublic,qKind:qKind,qCorr:qCorr,toSlider:toSlider,figHtml:figHtml,QE:QE,mulberry32:mulberry32,BANK:BANK,NIVEAUX:NIVEAUX,METIERS:METIERS,ERR:ERR,makeQuestion:makeQuestion,drawQuestions:drawQuestions,buildTree:buildTree,ITEM_BY_ID:ITEM_BY_ID,f:f,checkTyped:checkTyped,parseNumber:parseNumber,parseExpr:parseExpr,isFree:isFree,dureeQuestion:dureeQuestion};

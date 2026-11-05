@@ -28,21 +28,18 @@
 .door .ic svg{width:2rem;height:2rem}
 .door .go{display:inline-flex;margin-top:1rem;border-radius:999px;padding:.55rem 1.1rem;font-weight:900}
 .door.prof{background:var(--ink)}.door.prof .ic{background:rgba(246,196,83,.18);color:var(--bulb)}.door.prof .go{background:var(--bulb);color:var(--ink)}
-.door.eleve{background:#fff;color:var(--ink);border-color:var(--line)}.door.eleve p{color:var(--ink2);opacity:1}.door.eleve .ic{background:var(--sun-l);color:#C47A2C}.door.eleve .go{background:var(--ink);color:#fff}
+.door.eleve{background:var(--card);color:var(--ink);border-color:var(--line)}.door.eleve p{color:var(--ink2);opacity:1}.door.eleve .ic{background:var(--sun-l);color:#C47A2C}.door.eleve .go{background:var(--ink);color:#fff}
+.door.rev{background:var(--mint-d)}.door.rev .ic{background:rgba(255,255,255,.2);color:#fff}.door.rev .go{background:#fff;color:var(--mint-d)}
+.door.mel{background:var(--coral-d)}.door.mel .ic{background:rgba(255,255,255,.2);color:#fff}.door.mel .go{background:#fff;color:var(--coral-d)}
 .feats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0 1.6rem}
 @media (max-width:760px){.feats{grid-template-columns:1fr}}
-.feat{background:#fff;border-radius:22px;box-shadow:var(--sh);padding:1rem 1.1rem}
+.feat{background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:1rem 1.1rem}
 .feat b{display:block;font-size:1.05rem;margin-bottom:.2rem}
 .feat span{color:var(--ink2);font-size:.92rem}
 .apropos h2{font-size:1.5rem;margin-bottom:.6rem}
 .apropos h3{font-size:1.1rem;margin:1rem 0 .3rem}
 .apropos p,.apropos li{color:var(--ink2);font-weight:600}
 .apropos ul{padding-left:1.2rem}
-.revlink{display:flex;align-items:center;gap:.8rem;margin:1rem 0 0;padding:.85rem 1.1rem;background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);text-decoration:none;color:var(--ink);font-weight:700}
-.revlink .ic{width:2.4rem;height:2.4rem;border-radius:12px;background:var(--mint-l);color:var(--mint-d);display:flex;align-items:center;justify-content:center;flex:none}
-.revlink .ic svg{width:1.3rem;height:1.3rem}
-.revlink .go{margin-left:auto;font-weight:900;color:var(--mint-d)}
-.revlink:hover{border-color:var(--mint)}
 </style>
 </head>
 <body>
@@ -56,11 +53,11 @@
   <div class="doors">
     <a class="door prof" href="prof.html"><span class="ic" id="ic-prof"></span><h2>Je suis prof</h2><p>Je choisis les notions, je vérifie les questions et j’ouvre une salle pour ma classe.</p><span class="go">Espace prof →</span></a>
     <a class="door eleve" href="eleve.html"><span class="ic" id="ic-eleve"></span><h2>Je suis élève</h2><p>Je tape le code affiché au tableau, je donne mon prénom et je joue !</p><span class="go">Rejoindre une partie →</span></a>
+    <a class="door rev" href="revisions.html"><span class="ic" id="ic-rev"></span><h2>Révisions</h2><p>Une fiche par notion : exemples corrigés, erreurs à éviter, puis entraînement.</p><span class="go">Réviser une notion →</span></a>
+    <a class="door mel" href="eleve.html?melee=1"><span class="ic" id="ic-mel"></span><h2>Mêlée entre élèves</h2><p>Une partie entre ami(e)s, sans prof : chacun(e) choisit sa notion, un téléphone fait tourner le jeu.</p><span class="go">Créer une mêlée →</span></a>
   </div>
-  <a class="revlink" href="revisions.html"><span class="ic" id="ic-rev"></span><span><b>Révisions</b> · une fiche par notion : exemples corrigés, erreurs à éviter, entraînement</span><span class="go">→</span></a>
-  <a class="revlink" href="eleve.html?melee=1"><span class="ic" id="ic-mel"></span><span><b>Mêlée entre élèves</b> · une partie entre ami(e)s sans prof : chacun choisit sa notion, un téléphone fait tourner le jeu</span><span class="go">→</span></a>
   <div class="feats">
-    <div class="feat"><b>3 modes de jeu</b><span>Un contre tous, Duel d’équipes, La Classe VS le Prof.</span></div>
+    <div class="feat"><b>4 modes de jeu</b><span>Un contre tous, Duel d’équipes (avec duel direct), La Classe VS le Prof, Mêlée entre élèves.</span></div>
     <div class="feat"><b>Questions variées</b><span>QCM, Vrai/Faux, saisie libre, tuiles à associer, remise en ordre, estimation au curseur, étape fausse à trouver, figures.</span></div>
     <div class="feat"><b>Respect des élèves</b><span>Prénom ou pseudo, aucun compte, aucune publicité, aucun traceur.</span></div>
   </div>
@@ -89,7 +86,7 @@
 /*@@COMMONJS@@*/
 $("brand").outerHTML=brandHtml("","index.html");
 $("biglogo").innerHTML=logoSvg();
-$("ic-rev").innerHTML=ICO.book;$("ic-mel").innerHTML=ICO.swords;$("ic-prof").innerHTML=ICO.users;$("ic-eleve").innerHTML=ICO.rocket;
+$("ic-rev").innerHTML=ICO.book;$("ic-mel").innerHTML=ICO.flame;$("ic-prof").innerHTML=ICO.users;$("ic-eleve").innerHTML=ICO.rocket;
 $("foot").innerHTML=footHtml();
 initZoom("index",$("zoom"));
 pwaInit();

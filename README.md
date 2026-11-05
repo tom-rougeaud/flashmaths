@@ -28,6 +28,12 @@ Le prof règle la partie, choisit des notions dans le programme de son niveau, v
   <img src="readme-eleve.png" alt="Sur le téléphone : temps de lecture, réponse, guirlande de fin" width="760">
 </p>
 
+## Nouveautés de la version 4.1
+
+- **Accueil à quatre cartes** de même style et de couleurs distinctes : Je suis prof, Je suis élève, Révisions, Mêlée entre élèves.
+- **Huit thèmes de couleurs** (Cahier, Océan, Forêt, Couchant, Lavande, Bonbon, Sable, Contraste fort) : fonds colorés et textes colorés, au choix depuis le bouton *Thèmes* de l’en-tête, sur toutes les pages. Le choix reste sur l’appareil.
+- **Notion toujours visible** : chaque question affiche son chapitre et sa notion, au tableau comme sur les téléphones.
+
 ## Nouveautés de la version 4.0
 
 - **Application installable** sur téléphone, tablette et PC (bouton *Installer l’appli*), qui s’ouvre même sans réseau pour l’entraînement et les révisions.

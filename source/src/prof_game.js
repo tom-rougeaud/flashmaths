@@ -75,7 +75,7 @@ function nextQuestion(){
   G.phase="q";G.cur=true;G.ans={};G.hostAns=null;G.qStart=Date.now()+G.rd;G.dur=qDur(q)*1000;G.extra=0;G.bub=0;G.lowS=-1;
   liveReset();
   $("g-qn").textContent="Question "+(G.i+1)+" / "+G.qs.length;
-  $("g-meta").innerHTML=kindTagHtml(q)+'<span class="tag">'+esc(q.titre||"")+"</span>";
+  $("g-meta").innerHTML=notionHtml(q)+kindTagHtml(q);
   setGameQ(q);
   var kd=qKind(q);
   if(q.libre)$("g-choices").innerHTML='<div class="g-hidden" style="grid-column:1/-1">'+ICO.keyb+"Répondez sur votre téléphone avec le clavier</div>";
@@ -336,7 +336,7 @@ function openAnswers(i){
   openModal("m-ans");
 }
 $("g-rev").addEventListener("click",function(e){if(e.target.closest("#g-ansall"))openAnswers();});
-function renderRevealFromHist(i){var h=G.hist[i];if(!h)return;showGameScreen();$("g-qn").textContent="Question "+(i+1)+" / "+G.qs.length;setGameQ(G.qs[i]);$("g-meta").innerHTML="";renderReveal(h,null,null);}
+function renderRevealFromHist(i){var h=G.hist[i];if(!h)return;showGameScreen();$("g-qn").textContent="Question "+(i+1)+" / "+G.qs.length;setGameQ(G.qs[i]);$("g-meta").innerHTML=notionHtml(G.qs[i])+kindTagHtml(G.qs[i]);renderReveal(h,null,null);}
 function medianOf(a){var s=a.slice().sort(function(x,y){return x-y;}),n=s.length;return n?(n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2):0;}
 /* erreur type la plus fréquente sur cette question (diagnostic pour le prof) */
 function errTopHtml(errs,nAns){

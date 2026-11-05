@@ -5,7 +5,7 @@
    Les textes français utilisent l’apostrophe typographique ’.
 ═══════════════════════════════════════════════════════════════ */
 "use strict";
-var FM_VERSION="4.0";
+var FM_VERSION="4.1";
 function $(id){return document.getElementById(id);}
 function $$(sel,root){return [].slice.call((root||document).querySelectorAll(sel));}
 function esc(s){return String(s===undefined||s===null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -75,6 +75,7 @@ var ICO={
   heart:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8.5-5.3-8.5-11.4A4.9 4.9 0 0 1 12 6.4a4.9 4.9 0 0 1 8.5 3.2C20.5 15.7 12 21 12 21"/></svg>',
   mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>',
   lock:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10V8a5 5 0 0 1 10 0v2h1.5v11h-13V10zm2.5 0h5V8a2.5 2.5 0 0 0-5 0z"/></svg>',
+  palette:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 1.6-2.1-.5-1.3.3-2.4 1.6-2.4H17a4 4 0 0 0 4-4C21 6.8 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.1" fill="currentColor"/><circle cx="10" cy="7.2" r="1.1" fill="currentColor"/><circle cx="14.5" cy="7.2" r="1.1" fill="currentColor"/></svg>',
   home:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2.5 11h2.8v9.5h5v-6h3.4v6h5V11h2.8z"/></svg>',
   menu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
   flag:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 2.5h2.2V22H5zM8.5 3.5c3.6-1.6 6.4 1.7 11 0v10c-4.6 1.7-7.4-1.6-11 0z"/></svg>'
@@ -158,11 +159,37 @@ function checkPseudo(raw){
   return {ok:true,p:p};
 }
 
+/* ─── Thèmes de couleurs (v4.1) : mémorisés sur l’appareil, communs à toutes les pages ─── */
+var THEMES=[["cahier","Cahier","#F6F7FB","#5B55C4","#D9606A"],["ocean","Océan","#D4EBF8","#1769B0","#C45E2E"],["foret","Forêt","#D6EBD8","#287A4B","#C4622E"],["couchant","Couchant","#FFE3CC","#BF4B26","#A8366A"],["lavande","Lavande","#E5DCF8","#6745C2","#C0457F"],["bonbon","Bonbon","#FCDDE8","#C03A75","#2C7FB8"],["sable","Sable","#F3E8BE","#8F6500","#B4432F"],["contraste","Contraste fort","#FFFFFF","#2B22B5","#B3202E"]];
+function themeGet(){var t="cahier";try{t=localStorage.getItem("fm3_theme")||"cahier";}catch(e){}return THEMES.some(function(x){return x[0]===t;})?t:"cahier";}
+function themeSet(t){
+  document.documentElement.setAttribute("data-theme",t);try{localStorage.setItem("fm3_theme",t);}catch(e){}
+  var m=document.querySelector('meta[name="theme-color"]');if(m){var c=THEMES.filter(function(x){return x[0]===t;})[0];if(c)m.setAttribute("content",t==="cahier"?"#5B55C4":c[3]);}
+}
+document.documentElement.setAttribute("data-theme",themeGet());
+function themeInit(host){
+  if(!host||host.parentNode.querySelector(".thm"))return;
+  var w=document.createElement("span");w.className="thm";
+  w.innerHTML='<button type="button" class="ibtn" id="thm-btn" title="Changer les couleurs de l’application" aria-label="Thèmes de couleurs" aria-expanded="false">'+ICO.palette+'<span class="thm-lb">Thèmes</span></button>';
+  host.parentNode.insertBefore(w,host);
+  var pop=null;
+  function close(){if(pop){pop.remove();pop=null;w.firstChild.setAttribute("aria-expanded","false");}}
+  function open(){
+    pop=document.createElement("div");pop.className="thm-pop";var cur=themeGet();
+    pop.innerHTML="<h4>Couleurs de l’application</h4>"+THEMES.map(function(t){return '<button type="button" class="thm-it'+(t[0]===cur?" on":"")+'" data-t="'+t[0]+'"><i class="thm-sw" style="background:linear-gradient(135deg,'+t[2]+' 0 45%,'+t[3]+' 45% 75%,'+t[4]+' 75%)"></i>'+t[1]+"</button>";}).join("");
+    w.appendChild(pop);w.firstChild.setAttribute("aria-expanded","true");
+    pop.addEventListener("click",function(e){var b=e.target.closest(".thm-it");if(!b)return;themeSet(b.getAttribute("data-t"));close();});
+  }
+  w.firstChild.addEventListener("click",function(e){e.stopPropagation();pop?close():open();});
+  document.addEventListener("click",function(e){if(pop&&!w.contains(e.target))close();});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape")close();});
+}
 /* ─── Zoom A− / A+ (taille du texte de toute la page) ─── */
 function initZoom(key,host){
   var z=store.get("zoom_"+key,1);
   function apply(){z=clamp(Math.round(z*10)/10,0.7,1.8);document.documentElement.style.setProperty("--fz",z);store.set("zoom_"+key,z);var s=host&&host.querySelector("span");if(s)s.textContent=Math.round(z*100)+" %";if(typeof FIT!=="undefined"&&FIT.on){FIT.max=FIT.base*z;fitSoon(0);}}
   if(host){
+    themeInit(host);
     host.innerHTML='<button type="button" data-z="-1" title="Réduire le texte" aria-label="Réduire le texte">A−</button><span>100 %</span><button type="button" data-z="1" title="Agrandir le texte" aria-label="Agrandir le texte">A+</button>';
     host.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;z+=0.1*(+b.getAttribute("data-z"));apply();});
   }
