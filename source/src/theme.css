@@ -314,8 +314,8 @@ html[data-theme=couchant] body,html[data-theme=ocean] body,html[data-theme=foret
 html.narrow .thm-lb{display:none}
 
 /* v4.1 : notion de la question (chapitre › item), toujours visible */
-.nt{display:inline-flex;flex-direction:column;align-items:flex-start;gap:.05rem;background:var(--violet);color:#fff;border-radius:12px;padding:.25rem .7rem;line-height:1.15;max-width:100%}
-.nt small{font-size:.66rem;font-weight:800;opacity:.85;letter-spacing:.02em;text-transform:uppercase}
-.nt b{font-size:.92rem;font-weight:900}
+.ntb{display:inline-flex;flex-direction:column;align-items:flex-start;gap:.05rem;background:var(--violet);color:#fff;border-radius:12px;padding:.25rem .7rem;line-height:1.15;max-width:100%}
+.ntb small{font-size:.66rem;font-weight:800;opacity:.85;letter-spacing:.02em;text-transform:uppercase}
+.ntb b{font-size:.92rem;font-weight:900}
 .q-notion{margin-bottom:.45rem}.q-notion:empty{display:none}
-.g-meta .nt{padding:.35rem .9rem;border-radius:14px}.g-meta .nt small{font-size:.75rem}.g-meta .nt b{font-size:1.1rem}
+.g-meta .ntb{padding:.35rem .9rem;border-radius:14px}.g-meta .ntb small{font-size:.75rem}.g-meta .ntb b{font-size:1.1rem}

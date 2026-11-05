@@ -345,9 +345,10 @@ function notionOf(q){
   return {ch:"",ti:"Question du prof"};
 }
 function notionHtml(q){
+  var sb=q&&(q.sub||q.sb);if(sb==='qui'||sb==='intrus')return ""; /* la notion donnerait un indice */
   var n=notionOf(q);if(!n.ti&&!n.ch)return "";
   var esc2=function(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
-  return '<span class="nt">'+(n.ch&&n.ch!==n.ti?"<small>"+esc2(n.ch)+"</small>":"")+"<b>"+esc2(n.ti)+"</b></span>";
+  return '<span class="ntb">'+(n.ch&&n.ch!==n.ti?"<small>"+esc2(n.ch)+"</small>":"")+"<b>"+esc2(n.ti)+"</b></span>";
 }
 function kindTagHtml(q){
   var k=qKind(q),t=KIND_TAG[k]||(q.sub&&k==="qcm"?KIND_TAG[q.sub]:null),h=t?'<span class="tag '+t[1]+'">'+t[0]+"</span>":"";
