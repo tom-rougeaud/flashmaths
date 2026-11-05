@@ -22,10 +22,10 @@ async def main():
         await prof.screenshot(path=OUT+'p2_surprise.png',full_page=True)
         # réglages : duel, 6 questions -> 5, format mixte, temps 15 s
         await prof.click('#acc-set summary')
-        await prof.click('#modes .mode[data-m="duel"]');await prof.click('#seg-nq button[data-v="5"]');await prof.click('#seg-dur button[data-v="15"]');await prof.click('#seg-fmt button[data-v="mix"]')
+        await prof.click('#modes .mode[data-m="duel"]');await prof.click('#seg-nq button[data-v="5"]');await prof.click('#seg-dur button[data-v="15"]');await prof.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.fmt="mix";P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];saveSetup();renderSettings()')
         await prof.screenshot(path=OUT+'p3_settings.png',full_page=True)
-        await prof.evaluate('P.vary=false;P.est=false;saveSetup()')
-        await prof.evaluate('P.read=0;saveSetup()');await prof.click('#b-gen');await prof.wait_for_timeout(500)
+        await prof.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.vary=false;P.est=false;saveSetup()')
+        await prof.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.read=0;saveSetup()');await prof.click('#b-gen');await prof.wait_for_timeout(500)
         await prof.screenshot(path=OUT+'p4_preview.png',full_page=True)
         # édition d’une question (la 1re)
         await prof.click('#pv-list .pq[data-i="0"] [data-a="edit"]');await prof.wait_for_timeout(200)

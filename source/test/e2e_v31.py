@@ -20,7 +20,7 @@ async def main():
         prof=await newpage(ctx,'PROF',1366,860)
         await prof.goto(B+'prof.html');await prof.wait_for_timeout(600)
         await prof.screenshot(path=OUT+'p_pick.png')
-        await prof.evaluate('P.read=0;P.sel=["cc_signes","relatifs","pct_mental"];P.nq=4;P.fmt="mix";P.dur=15;P.mode="boss";P.auto=false;saveSetup();refreshAll()')
+        await prof.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.read=0;P.sel=["cc_signes","relatifs","pct_mental"];P.nq=4;P.fmt="mix";P.dur=15;P.mode="boss";P.auto=false;saveSetup();refreshAll()')
         await prof.click('#b-gen');await prof.wait_for_timeout(500)
         await prof.screenshot(path=OUT+'p_preview_hidden.png')
         hid=await prof.evaluate('getComputedStyle(document.querySelector("#pv-list .ch.ok")||document.body).backgroundColor')

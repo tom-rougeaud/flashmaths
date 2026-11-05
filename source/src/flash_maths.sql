@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
---  FLASH MATHS v3.1 — base de données Supabase (schéma version 4) (à coller UNE FOIS dans
+--  FLASH MATHS v4.0 — base de données Supabase (schéma version 5) (à coller UNE FOIS dans
 --  Supabase › SQL Editor › New query, puis cliquer « Run »)
 --
 --  Ce que la base conserve :
@@ -22,7 +22,7 @@
 create table if not exists public.fm_rooms (
   code        text primary key check (code ~ '^[0-9A-F]{4}$'),
   host_token  uuid not null,
-  mode        text not null default 'duel' check (mode in ('solo','duel','boss')),
+  mode        text not null default 'duel' check (mode in ('solo','duel','boss','melee')),
   status      text not null default 'open' check (status in ('open','playing','ended')),
   max_players int  not null default 30 check (max_players between 1 and 30),
   created_at  timestamptz not null default now(),
@@ -51,6 +51,19 @@ create table if not exists public.fm_results (
 create index if not exists fm_results_teacher_idx on public.fm_results (teacher_hash, played_at desc);
 
 -- Tables fermées : aucun accès direct depuis les pages
+-- v4.0 (schéma 5) : nouveau mode « melee » (Mêlée entre élèves, sans prof). Les bases déjà créées
+-- gardent l’ancienne contrainte solo / duel / boss : on la remplace (sans risque si le script est relancé).
+do $$
+declare c text;
+begin
+  for c in select conname from pg_constraint
+            where conrelid = 'public.fm_rooms'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%mode%'
+  loop
+    execute 'alter table public.fm_rooms drop constraint ' || quote_ident(c);
+  end loop;
+  alter table public.fm_rooms add constraint fm_rooms_mode_check check (mode in ('solo','duel','boss','melee'));
+end $$;
+
 alter table public.fm_rooms   enable row level security;
 alter table public.fm_players enable row level security;
 alter table public.fm_results enable row level security;
@@ -78,7 +91,7 @@ $$;
 create or replace function public.fm_ping() returns json
 language plpgsql security definer set search_path = public as $$
 begin
-  return json_build_object('ok', true, 'version', 4,
+  return json_build_object('ok', true, 'version', 5,
     'rooms', (select count(*) from fm_rooms where last_seen > now() - interval '10 minutes'));
 end $$;
 
@@ -91,7 +104,7 @@ begin
   if (select count(*) from fm_rooms) >= 3000 then
     return json_build_object('ok', false, 'err', 'too_many_rooms');
   end if;
-  if p_mode not in ('solo','duel','boss') then p_mode := 'duel'; end if;
+  if p_mode not in ('solo','duel','boss','melee') then p_mode := 'duel'; end if;
   loop
     i := i + 1;
     v_code := upper(lpad(to_hex(floor(random() * 65536)::int), 4, '0'));
@@ -133,7 +146,7 @@ declare r fm_rooms;
 begin
   update fm_rooms set last_seen = now(),
          status = coalesce(case when p_status in ('open','playing','ended') then p_status end, status),
-         mode   = coalesce(case when p_mode in ('solo','duel','boss') then p_mode end, mode)
+         mode   = coalesce(case when p_mode in ('solo','duel','boss','melee') then p_mode end, mode)
    where code = upper(p_code) and host_token = p_token
   returning * into r;
   if not found then return json_build_object('ok', false, 'err', 'not_found'); end if;
@@ -280,5 +293,5 @@ grant execute on function
   public.fm_delete_result(text, uuid)
 to anon, authenticated;
 
--- Vérification : doit afficher {"ok" : true, "version" : 3, ...}
+-- Vérification : doit afficher {"ok" : true, "version" : 5, ...}
 select public.fm_ping();

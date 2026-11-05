@@ -100,6 +100,7 @@ function onMsg(m){
   p.last=Date.now();
   if(m.t==="tm"){if(G.mode==="duel"&&!G.lk&&m.k>=0&&m.k<G.teams.length){p.team=m.k|0;renderLobby();pushLobby();}}
   else if(m.t==="an"){recvAnswer(p,m);}
+  else if(m.t==="dvote"){recvVote(p,m);}
   else if(m.t==="bye"){p.on=false;p.away=false;awayUpdate();renderLobby();pushLobby();updateAnswered();}
   else if(m.t==="aw"){setAway(p,!!m.v);}
 }
@@ -190,7 +191,7 @@ function renderLobby(){
     h+="</div>";
   }else{
     $("lb-title").textContent=G.mode==="boss"?"La Classe contre le Prof":"Un contre tous";
-    h=(G.mode==="boss"?hostStatusHtml():"")+'<div class="players">'+(ps.length?ps.map(function(p){return chip(p,true);}).join(""):'<div class="wait-big"><div class="dots"><span></span><span></span><span></span></div><p>En attente des élèves… Ils tapent le code <b>'+G.code+"</b> sur la page élève.</p></div>")+"</div>";
+    h=(G.mode==="boss"?hostStatusHtml()+'<details class="acc one-dev"><summary>Je n’ai qu’un seul appareil</summary><div class="acc-b"><p class="small">Le prof répond en secret : si vous jouez sur l’ordinateur projeté, toute la classe voit vos réponses. Trois solutions :</p><ul class="small"><li><b>Écran étendu</b> : ouvrez la page élève dans une fenêtre placée sur l’écran non projeté.</li><li><b>Masquer l’écran</b> (bouton pendant la partie) : plus rien n’est projeté le temps de répondre ; les élèves continuent sur leurs téléphones. Réaffichez pour la correction.</li><li>Plus simple : passez en <b>Duel d’équipes</b> à deux équipes, rejoignez l’équipe 1 avec un téléphone et la classe l’équipe 2.</li></ul></div></details>':"")+'<div class="players">'+(ps.length?ps.map(function(p){return chip(p,true);}).join(""):'<div class="wait-big"><div class="dots"><span></span><span></span><span></span></div><p>En attente des élèves… Ils tapent le code <b>'+G.code+"</b> sur la page élève.</p></div>")+"</div>";
   }
   $("lb-tools").innerHTML=tools;
   $("lb-zone").innerHTML=h;

@@ -3,7 +3,7 @@
 ═══════════════════════════════════════════════════════════════ */
 function qPayload(q,i){
   var o=qPublic(q);o.t="q";o.i=i;o.N=G.qs.length;o.dur=G.dur;
-  if(G.rd)o.rd=G.rd;if(G.pts==="juste")o.sm="juste";if(G.hd)o.hd=G.hd*1000;
+  if(G.rd)o.rd=G.rd;if(G.pts==="juste")o.sm="juste";if(G.hd)o.hd=G.hd*1000;if(G.bet)o.bt=1;if(q.dd)o.dd={ch:q.dd.ch,na:q.dd.na};
   return o;
 }
 function wideKind(q){var k=qKind(q);return k==="assoc"||k==="ordre"||k==="slider";}
@@ -22,12 +22,13 @@ function startGame(){
   G.qs=QS.map(function(q){return JSON.parse(JSON.stringify(q));});
   rememberPlayed(G.qs);
   G.i=-1;G.hist=[];G.tscore=G.teams.map(function(){return 0;});
-  G.boss={pc:100,pp:100,mc:100,mp:100};
+  G.boss={pc:100,pp:100,mc:100,mp:100};G.ddAt={};
   /* mode automatique : activé d’office en « Classe VS Prof », sinon selon le réglage ; modifiable en jeu */
   G.auto=G.mode==="boss"?true:!!P.auto;autoBtn();
   G.pts=P.pts==="juste"?"juste":"vite";G.read=Math.max(0,Math.min(10,+P.read||0));
+  G.bet=G.mode!=="boss"&&!!P.bet;
   G.hd=G.mode==="boss"?Math.max(0,Math.min(10,+P.hd||0)):0;G.hpen=G.mode==="boss"&&!!P.hpen;
-  plist().forEach(function(p){p.score=0;p.ok=0;p.na=0;p.streak=0;p.best=0;p.free=0;p.wire=0;p.fast=0;p.ans={};});
+  plist().forEach(function(p){p.score=0;p.ok=0;p.na=0;p.streak=0;p.best=0;p.free=0;p.wire=0;p.fast=0;p.bets=0;p.betKo=0;p.ans={};});
   G.phase="cd";pushLobby();hostPing(false);
   showGameScreen();
   showRules(function(){countdown(function(){nextQuestion();});});
@@ -80,7 +81,7 @@ function nextQuestion(){
   if(q.libre)$("g-choices").innerHTML='<div class="g-hidden" style="grid-column:1/-1">'+ICO.keyb+"Répondez sur votre téléphone avec le clavier</div>";
   else if(wideKind(q))$("g-choices").innerHTML='<div class="g-wide">'+(kd==="slider"?scaleHtml(q.sl,{big:true}):P.hide?'<div class="g-hidden">'+ICO.eyeoff+"Les tuiles sont sur vos téléphones</div>":kd==="assoc"?assocHtml(q):ordreHtml(q))+'<div class="g-how">'+(kd==="slider"?"Estimez avec le curseur sur votre téléphone":kd==="assoc"?"Associez les tuiles deux par deux":"Remettez les tuiles dans l’ordre"+(q.how?" : "+esc(q.how):""))+"</div></div>";
   else if(P.hide)$("g-choices").innerHTML='<div class="g-hidden" style="grid-column:1/-1">'+ICO.eyeoff+"Les propositions sont sur vos téléphones</div>";
-  else $("g-choices").innerHTML=q.choices.map(function(c,k){return '<div class="gch a'+k+'"><span class="sh">'+SHAPES[k]+"</span><span>"+rt(c.t)+"</span></div>";}).join("");
+  else $("g-choices").innerHTML=q.choices.map(function(c,k){return '<div class="gch a'+k+'"><span class="sh">'+SHAPES[k]+"</span><span>"+rt(c.t)+"</span></div>";}).join("")+(kd==="multi"?'<div class="g-how" style="grid-column:1/-1">Plusieurs réponses sont justes : cochez-les toutes sur votre téléphone</div>':"");
   $("g-choices").style.gridTemplateColumns=(!q.libre&&!wideKind(q)&&!P.hide&&q.choices.length===2)?"1fr 1fr":"";
   var vl=function(c){return String(c).replace(/\$([^$]*)\$/g,function(m,t){return t.replace(/\\[a-zA-Z]+/g,"x").replace(/[{}^_ ]/g,"");}).length;};
   $("g-choices").classList.toggle("one",!q.libre&&!wideKind(q)&&!P.hide&&q.choices.some(function(c){return vl(c.t)>26;}));
@@ -90,7 +91,8 @@ function nextQuestion(){
   $("g-scene").classList.add("small");
   $("g-choices").classList.toggle("veil",G.rd>0);$("g-timer").classList.toggle("read",G.rd>0);
   updateAnswered();
-  send(qPayload(q,G.i));snapshot();fitSoon(0);
+  send(qPayload(q,G.i));snapshot();fitSoon(0);ddButton();
+  if(q.dd)$("g-meta").innerHTML='<span class="tag t-coral">'+ICO.swords+"Duel direct : "+esc(q.dd.na.join(" contre "))+"</span>"+$("g-meta").innerHTML;
   clearInterval(G.tick);G.tick=setInterval(tick,200);tick();
 }
 function remaining(){return G.dur+G.extra-(Date.now()-G.qStart);}
@@ -110,19 +112,22 @@ function updateAnswered(){
   hostIndicator();liveCount();
   if(G&&$("g-players"))$("g-players").innerHTML=ICO.users+"Joueurs ("+online().length+")";
   if(!G||(G.phase!=="q"&&G.phase!=="rv"))return;
-  var on=online(),n=on.filter(function(p){return G.ans[p.id];}).length;
+  var on=expected(),n=on.filter(function(p){return G.ans[p.id];}).length;
   var el=$("g-ans");el.textContent=n+" / "+on.length+" ont répondu";
   el.classList.remove("pulse");void el.offsetWidth;el.classList.add("pulse");
   if(G.phase==="q"&&P.early!==false&&on.length&&n>=on.length&&!(G.mode==="boss"&&G.host&&G.host.on&&!G.hostAns)&&!G.earlyT)G.earlyT=setTimeout(function(){G.earlyT=null;if(G.phase==="q")reveal();},900);
 }
+/* joueurs attendus sur la question en cours (en duel direct : les deux champions seulement) */
+function expected(){var q=G&&G.qs[G.i];if(q&&q.dd)return online().filter(function(p){return q.dd.ch.indexOf(p.id)>=0;});return online();}
 function recvAnswer(p,m){
   if(G.phase!=="q"||m.i!==G.i||G.ans[p.id])return;
+  var qd=G.qs[G.i];if(qd&&qd.dd&&qd.dd.ch.indexOf(p.id)<0)return;   /* duel direct : seuls les deux champions répondent */
   var q=G.qs[G.i],el=Math.max(0,Date.now()-G.qStart),lim=G.dur+G.extra;
   if(el>lim+1500)return;
   var ms=+m.ms;if(!(ms>=0))ms=el;
   var t=clamp(Math.min(el,Math.max(ms,el-2500)),0,lim);
   var res=judgeMsg(q,m);
-  res.t=t;res.rem=lim-el;
+  res.t=t;res.rem=lim-el;res.bet=G.bet&&m.bt?1:0;
   G.ans[p.id]=res;
   /* effets en direct (sans dévoiler la justesse) */
   var T=G.mode==="duel"&&p.team>=0&&p.team<TEAMS.length?TEAMS[p.team]:null,col=T?T.c:"var(--violet)";
@@ -139,6 +144,7 @@ function cleanV(q,v){
   if(k==="libre")return String(v===undefined||v===null?"":v).slice(0,40);
   if(k==="assoc"||k==="ordre"){var n=k==="assoc"?q.L.length:q.D.length;return Array.isArray(v)?v.slice(0,n).map(function(x){x=x|0;return x>=0&&x<n?x:0;}):[];}
   if(k==="slider"){var x=+v;return isFinite(x)?Math.max(q.sl.min,Math.min(q.sl.max,x)):null;}
+  if(k==="multi"){var u=[];(Array.isArray(v)?v:[]).forEach(function(t){t=t|0;if(t>=0&&t<q.choices.length&&u.indexOf(t)<0)u.push(t);});return u.sort(function(a,b){return a-b;});}
   return undefined;
 }
 function judgeMsg(q,m){
@@ -149,6 +155,7 @@ function vText(q,v){
   var k=qKind(q);
   if(k==="slider"&&typeof v==="number")return fmtSl(q.sl,v);
   if(k==="libre")return v||"";
+  if(k==="multi")return Array.isArray(v)&&v.length?v.map(function(x){return "ABCDE".charAt(x);}).join(", "):"";
   return "";
 }
 function extendTime(){if(!G||G.phase!=="q")return;G.extra+=30000;send({t:"tx",i:G.i,add:30000});toast("+30 secondes");}
@@ -158,15 +165,17 @@ function reveal(){
   if(!G||G.phase!=="q")return;
   clearInterval(G.tick);clearTimeout(G.earlyT);G.earlyT=null;
   G.phase="rv";G.cur=false;
-  var q=G.qs[G.i],lim=G.dur+G.extra,dur=lim/1000,on=online(),N=q.choices.length;
+  var q=G.qs[G.i],lim=G.dur+G.extra,dur=lim/1000,on=expected(),N=q.choices.length,dd=q.dd||null;
   send({t:"lk",i:G.i});
   var kd=qKind(q),dist=q.choices.map(function(){return 0;}),typed={},nAns=0,nOk=0,nPart=0,fast=null,rs={},sv=[],pp=kd==="assoc"?q.L.map(function(){return 0;}):null,errC={};
-  var tPts=G.teams.map(function(){return {s:0,n:0,all:true};});
+  var tPts=G.teams.map(function(){return {s:0,n:0,all:true};}),nBet=0,nBetKo=0;
   plist().forEach(function(p){
+    if(dd&&dd.ch.indexOf(p.id)<0){p.ans[G.i]={k:-1,ok:false,t:null,pts:0,an:0,pa:0,e:"",sp:1};return;}   /* spectateur du duel direct */
     var a=G.ans[p.id],pts=0,ok=false;
     if(a){
       nAns++;ok=a.ok;
       if((kd==="qcm"||kd==="vf")&&a.k>=0&&a.k<N)dist[a.k]++;
+      if(kd==="multi"&&Array.isArray(a.v))a.v.forEach(function(t){if(t>=0&&t<N)dist[t]++;});
       if(q.libre){var key=String(a.v||"").trim()||"(vide)";typed[key]=typed[key]||{n:0,ok:a.ok};typed[key].n++;}
       if(kd==="slider"&&typeof a.v==="number")sv.push({v:a.v,c:a.ok?"ok":a.part>0?"pa":"ko"});
       if(pp&&Array.isArray(a.v))a.v.forEach(function(j,i){if(q.rk[j]===i)pp[i]++;});
@@ -183,14 +192,23 @@ function reveal(){
       p.best=Math.max(p.best,p.streak);
     }else if(p.on){p.streak=0;}
     if(a||p.on){p.na++;}
-    p.score+=pts;
-    p.ans[G.i]={k:a?a.k:-1,v:a?a.v:undefined,ok:ok,t:a?a.t:null,pts:pts,an:a?1:0,pa:a&&!ok&&a.part>0?1:0,e:a&&!ok?a.err:""};
-    if(G.mode==="duel"&&p.team>=0&&p.team<tPts.length&&(a||p.on)){var tp=tPts[p.team];tp.s+=pts;tp.n++;if(!ok)tp.all=false;}
+    /* pari de certitude : ×2 si juste, −BET_LOSS si faux (même partiellement) */
+    if(a&&a.bet){nBet++;if(ok)pts*=2;else{pts=-BET_LOSS;nBetKo++;p.betKo=(p.betKo||0)+1;}p.bets=(p.bets||0)+1;}
+    p.score=Math.max(0,p.score+pts);
+    p.ans[G.i]={k:a?a.k:-1,v:a?a.v:undefined,ok:ok,t:a?a.t:null,pts:pts,an:a?1:0,pa:a&&!ok&&a.part>0?1:0,e:a&&!ok?a.err:"",bt:a&&a.bet?1:0};
+    if(G.mode==="duel"&&!dd&&p.team>=0&&p.team<tPts.length&&(a||p.on)){var tp=tPts[p.team];tp.s+=pts;tp.n++;if(!ok)tp.all=false;}
   });
   var rate=nAns?nOk/Math.max(nAns,on.length):0;
-  var boost=null,dmg=null;
-  if(G.mode==="duel"){
-    boost=tPts.map(function(tp,k){var g=tp.n?Math.round(tp.s/tp.n)+(tp.all&&tp.n>=2?200:0):0;G.tscore[k]+=g;return g;});
+  var boost=null,dmg=null,ddRes=null;
+  if(G.mode==="duel"&&dd){
+    /* duel direct : le champion qui a juste, et le plus vite, rapporte DD_WIN points à son équipe */
+    var ca=G.ans[dd.ch[0]],cb=G.ans[dd.ch[1]],wa=ca&&ca.ok,wb=cb&&cb.ok,w=-1;
+    if(wa&&wb)w=ca.t<=cb.t?0:1;else if(wa)w=0;else if(wb)w=1;
+    boost=G.teams.map(function(){return 0;});
+    ddRes={w:-1,nw:"",pw:""};
+    if(w>=0){var wt=dd.t[w];G.tscore[wt]+=DD_WIN;boost[wt]=DD_WIN;ddRes.w=wt;ddRes.nw=G.teams[wt].n;ddRes.pw=dd.pn[w];}
+  }else if(G.mode==="duel"){
+    boost=tPts.map(function(tp,k){var g=tp.n?Math.round(tp.s/tp.n)+(tp.all&&tp.n>=2?200:0):0;G.tscore[k]=Math.max(0,G.tscore[k]+g);return g;});
   }
   if(G.mode==="boss"){
     var n=G.qs.length,b=G.boss,K=100/n;
@@ -210,14 +228,15 @@ function reveal(){
   }
   var ranks={};rankList().forEach(function(x,i){ranks[x.id]=i+1;});
   var stOf=function(a){return !a.an?-1:a.ok?1:a.pa?2:0;};
-  plist().forEach(function(p){var a=p.ans[G.i];rs[p.id]=[stOf(a),a.pts,p.score,p.streak,ranks[p.id],a.e||""];});
+  plist().forEach(function(p){var a=p.ans[G.i];rs[p.id]=[stOf(a),a.pts,p.score,p.streak,ranks[p.id],a.e||"",a.bt||0,a.sp||0];});
   if(G.host)rs[G.host.id]=[G.hostAns?(G.hostAns.ok?1:0):-1,0,0,0,0];
-  var who=plist().map(function(p){var a=p.ans[G.i];return [p.p,stOf(a),p.team,vText(q,a.v)];});
+  var who=plist().filter(function(p){return !dd||dd.ch.indexOf(p.id)>=0;}).map(function(p){var a=p.ans[G.i];return [p.p,stOf(a),p.team,vText(q,a.v)];});
   var nA=Math.max(nAns,1);
   var h={who:who,host:G.host?(G.hostAns?(G.hostAns.ok?1:0):-1):null,i:G.i,q:q.q,titre:q.titre,id:q.id||"",kd:kd,ans:answerText(q),libre:!!q.libre,rate:rate,nAns:nAns,nOn:on.length,nPart:nPart,dist:dist,typed:typed,fast:fast,choices:q.choices.map(function(c){return c.t;}),ansIdx:q.ans,expl:q.expl||"",errs:errC,
-    sv:sv,pp:pp?pp.map(function(c){return Math.round(100*c/nA);}):null};
+    sv:sv,pp:pp?pp.map(function(c){return Math.round(100*c/nA);}):null,bt:G.bet?[nBet,nBetKo]:null,dd:ddRes};
   G.hist[G.i]=h;
   var rv={t:"rv",i:G.i,ans:q.ans,at:h.ans,ex:q.expl||"",rate:Math.round(rate*100),rs:rs,fr:q.libre?1:0,cor:qCorr(q)};
+  if(ddRes)rv.dd={w:ddRes.w,nw:ddRes.nw,pw:ddRes.pw};
   if(G.mode==="duel"){rv.tm=G.tscore.slice();rv.tn=G.teams.map(function(t){return t.n;});}
   if(G.mode==="boss")rv.boss={pc:Math.round(G.boss.pc),pp:Math.round(G.boss.pp),dc:dmg.toClass,dp:dmg.toProf,h:dmg.host};
   if(G.mode==="solo")rv.top=rankList().slice(0,3).map(function(x){return [x.p,x.s];});
@@ -239,7 +258,7 @@ function renderReveal(h,boost,dmg){
     $("g-choices").style.gridTemplateColumns="";
   }else if(!q.libre){
     var na=Math.max(1,h.nAns);
-    $("g-choices").innerHTML=q.choices.map(function(c,k){return '<div class="gch a'+k+(k===q.ans?" good":" dim")+'" style="--p:'+Math.round(100*h.dist[k]/na)+'%"><span class="sh">'+SHAPES[k]+"</span><span>"+rt(c.t)+'</span><span class="bar">'+h.dist[k]+"</span></div>";}).join("");
+    $("g-choices").innerHTML=q.choices.map(function(c,k){var good=kd==="multi"?q.oks.indexOf(k)>=0:k===q.ans;return '<div class="gch a'+k+(good?" good":" dim")+'" style="--p:'+Math.round(100*h.dist[k]/na)+'%"><span class="sh">'+SHAPES[k]+"</span><span>"+rt(c.t)+'</span><span class="bar">'+h.dist[k]+"</span></div>";}).join("");
     $("g-choices").style.gridTemplateColumns=q.choices.length===2?"1fr 1fr":"";
   }else $("g-choices").innerHTML="";
   var pct=Math.round(h.rate*100),r='<div class="rv-grid"><div class="rv-rate" style="--p:'+pct+'">'+pct+'%<small>de réussite</small></div><div>'+
@@ -253,6 +272,8 @@ function renderReveal(h,boost,dmg){
   if(h.expl)r+='<div class="rv-x">'+rt(h.expl)+"</div>";
   if(P.names!==false)r+=whoHtml(h);
   r+='<div class="rv-btns"><button type="button" class="btn btn-sm btn-soft" id="g-ansall">'+ICO.users+"Voir la réponse de chaque joueur"+(G.mode==="duel"?" (par équipe)":"")+"</button></div>";
+  if(h.dd)r+='<div class="rv-bet"><span class="chip">'+ICO.swords+(h.dd.w<0?"Duel nul : personne ne marque.":esc(h.dd.pw)+" ("+esc(h.dd.nw)+") remporte le duel : +"+DD_WIN+" pts pour son équipe")+"</span></div>";
+  if(h.bt&&h.bt[0])r+='<div class="rv-bet"><span class="chip">'+ICO.check+h.bt[0]+" élève"+(h.bt[0]>1?"s":"")+" sûr(e)"+(h.bt[0]>1?"s":"")+" de soi"+(h.bt[1]?" · "+h.bt[1]+" dans l’erreur : une idée fausse à corriger":" · tous et toutes avaient raison")+"</span></div>";
   if(h.fast)r+='<div class="rv-fast"><span class="chip" style="background:var(--sun-l);color:#8A5A00">'+ICO.bolt+"Le plus rapide : "+esc(h.fast.p)+" ("+f(h.fast.t/1000,1)+" s)</span></div>";
   r+="</div></div>";
   $("g-rev").innerHTML=r;$("g-rev").classList.remove("hidden");$("g-qbox").classList.add("rv");
@@ -271,7 +292,7 @@ function renderReveal(h,boost,dmg){
   $("g-next").innerHTML=ICO.next+(last?"Voir les gagnants":"Question suivante");$("g-plus").disabled=true;
   updateAnswered();
   if(G.auto)startAuto();
-  fitSoon(0);
+  ddButton();fitSoon(0);
 }
 function startAuto(){
   clearInterval(G.autoT);
@@ -369,9 +390,9 @@ function showRules(cb){
   $("g-timer").classList.add("hidden");$("g-next").innerHTML=ICO.play+"Démarrer";$("g-ans").textContent="";
   /* formats présents dans la partie : seules leurs règles sont affichées */
   var fk=G.qs.map(function(q){var k=qKind(q);return (q.libre?"k":"")+(k==="assoc"||k==="ordre"?"t":"")+(k==="slider"?"e":"");}).join("");
-  box.innerHTML=rulesHtml(G.mode,{sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen,fk:fk})+'<div class="rules-act"><button type="button" class="btn btn-ghost" id="ru-back">Retour à la salle</button><button type="button" class="btn btn-go btn-xl" id="ru-go">'+ICO.play+"C’est parti !</button></div>";
+  box.innerHTML=rulesHtml(G.mode,{sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen,fk:fk,bt:G.bet,dd:G.mode==="duel"})+'<div class="rules-act"><button type="button" class="btn btn-ghost" id="ru-back">Retour à la salle</button><button type="button" class="btn btn-go btn-xl" id="ru-go">'+ICO.play+"C’est parti !</button></div>";
   $("g-rules").classList.remove("hidden");
-  send({t:"ru",m:G.mode,sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen?1:0,fk:fk});fitSoon(0);
+  send({t:"ru",m:G.mode,sm:G.pts,rd:G.read,hd:G.hd,hpen:G.hpen?1:0,fk:fk,bt:G.bet?1:0,dd:G.mode==="duel"?1:0});fitSoon(0);
   $("ru-go").onclick=function(){$("g-rules").classList.add("hidden");fitSoon(0);cb();};
   $("ru-back").onclick=function(){$("g-rules").classList.add("hidden");G.phase="lobby";G.lk=false;pushLobby();renderLobby();show("s-lobby");};
 }

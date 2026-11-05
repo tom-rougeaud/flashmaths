@@ -1,0 +1,17 @@
+{
+  "name": "Flash Maths",
+  "short_name": "Flash Maths",
+  "description": "Questions flash de maths en direct, au tableau et sur les téléphones (CAP, Bac Pro, 3e Prépa-Métiers).",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F6F7FB",
+  "theme_color": "#262A4F",
+  "lang": "fr",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

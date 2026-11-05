@@ -5,7 +5,7 @@
    Les textes français utilisent l’apostrophe typographique ’.
 ═══════════════════════════════════════════════════════════════ */
 "use strict";
-var FM_VERSION="3.6";
+var FM_VERSION="4.0";
 function $(id){return document.getElementById(id);}
 function $$(sel,root){return [].slice.call((root||document).querySelectorAll(sel));}
 function esc(s){return String(s===undefined||s===null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -80,6 +80,8 @@ var ICO={
   flag:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 2.5h2.2V22H5zM8.5 3.5c3.6-1.6 6.4 1.7 11 0v10c-4.6 1.7-7.4-1.6-11 0z"/></svg>'
 };
 /* logo : ampoule et point d’interrogation (image PNG transparente intégrée à la page) */
+ICO.swords='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l12 12M19 5L7 17M13.5 16.5l3-3M7.5 13.5l3 3M17 17l3 3M7 17l-3 3"/></svg>';
+ICO.book='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5-.7 1.5-1.5z"/></svg>';
 var LOGO_URI="/*@@LOGOURI@@*/";
 function logoSvg(){return '<img class="logo" src="'+LOGO_URI+'" alt="" width="64" height="64">';}
 function brandHtml(sub,href){return '<a class="brand" href="'+(href||"index.html")+'" title="Accueil Flash Maths">'+logoSvg()+'<span><b>Flash</b> <i>Maths</i></span>'+(sub?'<small>'+esc(sub)+'</small>':"")+'</a>';}
@@ -113,14 +115,18 @@ var RULES={
   boss:[["heart","La classe et le prof ont chacun 100 points de vie."],["star","Plus la classe réussit, plus elle inflige de dégâts à la jauge de vie du prof (100 % de réussite = coup critique)."],["bolt","Les erreurs et les absences de réponse de la classe abîment sa propre jauge."],["shield","Le prof répond aussi sur son téléphone : s’il trouve, et vite, il inflige des dégâts à la jauge de vie de la classe."],["trophy","À la fin, le camp qui a gardé le plus de vie gagne."]]
 };
 /* o = {sm:"juste"|"vite", rd:secondes de lecture} (réglages de la partie) */
+var BET_LOSS=300,DD_WIN=300,MANCHE=5;   /* pari de certitude : points perdus si l’élève s’est dit sûr(e) et se trompe */
 function rulesHtml(mode,o){
   o=o||{};
   var M=MODES[mode],li=function(r){return '<li><span class="ri">'+ICO[r[0]]+"</span><span>"+esc(r[1])+"</span></li>";};
   var com=RULES.common.slice();
   if(o.sm==="juste")com[0]=["check","1 000 points par bonne réponse, quelle que soit la vitesse : prends le temps de bien réfléchir."];
+  if(o.bt)com[com.length-1]=["cross","Erreur ou pas de réponse : 0 point, sauf si tu avais parié être sûr(e) de toi."];
+  if(o.bt)com.splice(com.length-1,0,["check","Pari de certitude : avant de répondre, touche « Je suis sûr(e) ». Points doublés si c’est juste, "+BET_LOSS+" points perdus si c’est faux."]);
   if(o.rd>0)com.splice(1,0,["eye","Les propositions apparaissent après "+o.rd+" secondes : lis bien l’énoncé d’abord."]);
   if(typeof o.fk==="string"){var keep={keyb:"k",tiles:"t",target:"e"};com=com.filter(function(r){return !keep[r[0]]||o.fk.indexOf(keep[r[0]])>=0;});}
   var R=RULES[mode].slice();
+  if(mode==="duel"&&o.dd)R.splice(R.length-1,0,["users","Duel direct (au plus une fois toutes les "+MANCHE+" questions) : les deux équipes en tête votent pour leur champion ou championne ; la personne la plus rapide qui a juste rapporte "+DD_WIN+" points à son équipe."]);
   if(mode==="boss"){
     if(o.hd>0)R.splice(R.length-1,0,["clock","Handicap du prof : la question s’affiche sur son téléphone "+o.hd+" s après les vôtres."]);
     if(o.hpen)R.splice(R.length-1,0,["heart","Handicap du prof : chaque erreur (ou absence de réponse) du prof abîme sa propre jauge."]);
@@ -451,4 +457,36 @@ function dragDrop(o){
     st={it:it,x:e.clientX,y:e.clientY,id:e.pointerId,ghost:null};
     window.addEventListener("pointermove",mv,{passive:false});window.addEventListener("pointerup",up);window.addEventListener("pointercancel",cancel);
   });
+}
+
+/* ─── v4.0 : installation sur l’écran d’accueil (appli installable, PWA) ───
+   La barre ne s’affiche que là où la page l’autorise (pwaAllowed), jamais pendant une partie. */
+var PWA_EVT=null,PWA_IOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+function pwaStandalone(){try{return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||!!navigator.standalone;}catch(e){return false;}}
+function pwaBar(){
+  if($("pwa-bar")||pwaStandalone())return;
+  if(typeof pwaAllowed==="function"&&!pwaAllowed())return;
+  var later=store.get("pwa_no",0);if(later&&Date.now()-later<7*864e5)return;   /* « Plus tard » : on repropose dans 7 jours */
+  if(!PWA_EVT&&!PWA_IOS)return;
+  var d=document.createElement("div");d.id="pwa-bar";d.setAttribute("role","dialog");d.setAttribute("aria-label","Installer Flash Maths");
+  d.innerHTML='<img src="'+LOGO_URI+'" alt=""><span>'+(PWA_EVT?"Installe <b>Flash Maths</b> sur l’écran d’accueil : accès direct, plein écran, entraînement même sans connexion.":"Sur iPhone ou iPad : touche <b>Partager</b> <span class=\"pwa-sh\" aria-hidden=\"true\">⬆︎</span> puis <b>Sur l’écran d’accueil</b> pour installer Flash Maths.")+"</span>"+
+    (PWA_EVT?'<button type="button" class="btn btn-go" id="pwa-ok">Installer</button>':"")+'<button type="button" class="btn btn-ghost" id="pwa-no">'+(PWA_EVT?"Plus tard":"Compris")+"</button>";
+  document.body.appendChild(d);
+  $("pwa-no").addEventListener("click",function(){store.set("pwa_no",Date.now());d.remove();});
+  if(PWA_EVT)$("pwa-ok").addEventListener("click",function(){var e=PWA_EVT;PWA_EVT=null;d.remove();try{e.prompt();}catch(x){}});
+}
+function pwaHide(){var d=$("pwa-bar");if(d)d.remove();}
+/* aide manuelle (menu « Installer l’appli ») : toujours disponible */
+function pwaHelp(){
+  if(pwaStandalone()){toast("Flash Maths est déjà installée sur cet appareil.");return;}
+  if(PWA_EVT){var e=PWA_EVT;PWA_EVT=null;pwaHide();try{e.prompt();}catch(x){}return;}
+  store.del("pwa_no");
+  if(PWA_IOS){pwaBar();return;}
+  toast("Menu du navigateur (⋮) puis « Installer l’application » ou « Ajouter à l’écran d’accueil ».");
+}
+function pwaInit(){
+  try{if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(function(){});}catch(e){}
+  window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();PWA_EVT=e;setTimeout(pwaBar,1200);});
+  window.addEventListener("appinstalled",function(){PWA_EVT=null;pwaHide();});
+  if(PWA_IOS)setTimeout(pwaBar,2500);
 }

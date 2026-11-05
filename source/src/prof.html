@@ -31,6 +31,8 @@
         <button type="button" data-m="mine">Mes questions (importer, exporter)</button>
         <button type="button" data-m="diag">Diagnostic de la base</button>
         <button type="button" data-m="help">Aide rapide</button>
+        <button type="button" data-m="pwa">Installer l’appli sur cet appareil</button>
+        <a href="revisions.html">Révisions (fiches par notion)</a>
         <a href="contact.html">Contact</a>
         <a href="confidentialite.html">Confidentialité</a>
         <a href="index.html">Accueil</a>
@@ -56,13 +58,13 @@
           <div><label class="lbl">Temps de lecture avant les propositions</label><div class="seg" id="seg-read"></div></div>
           <div><label class="lbl">Points</label><div class="seg" id="seg-pts"></div></div>
           <div><label class="lbl">Ordre des questions</label><div class="seg" id="seg-ord"></div></div>
-          <div><label class="lbl">Format des réponses</label><div class="seg" id="seg-fmt"></div></div>
+          <div><label class="lbl">Difficulté des notions</label><div class="seg" id="seg-diff"></div></div>
+          <div class="set-full"><label class="lbl">Types de questions <small class="muted">(un ou plusieurs ; valables pour tous les modes)</small></label><div class="chipsel" id="seg-fk"></div></div>
           <div id="w-teams"><label class="lbl">Nombre d’équipes</label><div class="seg" id="seg-nt"></div></div>
           <div id="w-boss" class="set-full boss-set"><label class="lbl">Handicap du prof (Classe VS Prof) : la question s’affiche plus tard sur son téléphone</label><div class="seg" id="seg-hd"></div>
             <label class="sw" style="margin-top:.5rem"><input type="checkbox" id="o-hpen"><i></i>Handicap supplémentaire : chaque erreur ou absence de réponse du prof abîme sa propre jauge</label></div>
           <div class="set-full opts">
-            <label class="sw"><input type="checkbox" id="o-vary"><i></i>Formats variés : tuiles à associer, remise en ordre, étape fausse à trouver</label>
-            <label class="sw"><input type="checkbox" id="o-est"><i></i>Calculs longs : une partie en estimation au curseur (ordre de grandeur)</label>
+            <label class="sw"><input type="checkbox" id="o-bet"><i></i>Pari de certitude : avant de répondre, chaque élève peut se dire « sûr(e) » — points doublés si c’est juste, 300 points perdus si c’est faux (Un contre tous et Duel d’équipes)</label>
             <label class="sw"><input type="checkbox" id="o-hide"><i></i>Masquer les propositions au tableau (elles restent sur les téléphones)</label>
             <label class="sw"><input type="checkbox" id="o-auto"><i></i>Enchaîner automatiquement les questions (10 s après la correction) — toujours activé au départ en « Classe VS Prof », modifiable pendant la partie</label>
             <label class="sw"><input type="checkbox" id="o-names"><i></i>Afficher qui a bien ou mal répondu après chaque question</label>
@@ -143,6 +145,8 @@
       <div class="g-ans" id="g-ans"></div>
       <div class="g-host hidden" id="g-host"></div>
       <span class="sp"></span>
+      <button type="button" class="btn btn-sm btn-soft hidden" id="g-dd-btn"></button>
+      <button type="button" class="btn btn-sm btn-soft" id="g-hide" title="Cacher le tableau (les téléphones continuent) : utile pour répondre en secret sur un seul appareil"></button>
       <button type="button" class="btn btn-sm btn-soft" id="g-players"></button>
       <button type="button" class="btn btn-sm btn-soft hidden" id="g-media" title="Afficher la figure ou la formule en plein écran pour la classe"></button><button type="button" class="btn btn-sm btn-soft" id="g-plus">+30 s</button>
       <button type="button" class="btn btn-sm btn-primary" id="g-next"></button>
@@ -163,6 +167,8 @@
       <div class="g-scene card" id="g-scene"></div>
     </div>
     <div class="g-rules hidden" id="g-rules" data-fit><div class="rules-box" id="rules-box"></div></div>
+    <div class="g-dd hidden" id="g-dd"></div>
+    <div class="g-curtain hidden" id="g-curtain" role="button" aria-label="Réafficher l’écran"><div><b>Écran masqué</b><span>La partie continue normalement sur les téléphones. Cliquez n’importe où ou appuyez sur Échap pour réafficher.</span></div></div>
     <div class="g-cd hidden" id="g-cd"><div class="cd-bulbs" id="g-cdb" aria-hidden="true"><i></i><i></i><i></i></div><span id="g-cdt">Prêts ?</span></div>
     <div class="mm hidden" id="m-media" role="dialog" aria-label="Média agrandi"><div class="mm-h"><span class="mm-n" id="mm-n"></span><button type="button" class="btn btn-soft" id="mm-x">Fermer (Échap)</button></div><div class="mm-b" id="mm-b"><div class="mm-t" id="mm-t"></div><div class="mm-f" id="mm-f"></div></div></div>
   </section>
@@ -365,6 +371,8 @@
     <li><b>Duel</b> : chaque élève glisse son jeton dans une équipe ; vous pouvez renommer les équipes et déplacer les élèves.</li>
     <li><b>Classe VS Prof</b> : « Afficher le code prof » donne le code à taper sur votre téléphone pour jouer contre la classe.</li>
     <li><b>Jouer</b> : les règles s’affichent, puis les questions. « Joueurs » permet de renommer, d’exclure ou de faire entrer un retardataire (QR code). Les prénoms s’empilent à droite à mesure que les élèves répondent. « +30 s » rallonge, « Écourter » passe directement aux gagnants.</li>
+    <li><b>Nouveautés v4.0</b> : <b>types de questions</b> à cocher (dont intrus, texte à trous, qui suis-je, plusieurs bonnes réponses) et <b>difficulté</b> des notions dans les réglages ; <b>pari de certitude</b> (option) ; en Duel, <b>Duel direct</b> entre les deux équipes en tête (une fois toutes les 5 questions) ; <b>Masquer l’écran</b> pour répondre en secret ; <b>Agrandir le média</b> pour une figure ou une formule.</li>
+    <li><b>Hors de la classe</b> : les élèves ont l’entraînement solo, les <b>Révisions</b> (une fiche par notion) et la <b>Mêlée</b> (partie entre élèves, sans prof).</li>
   </ol>
   <p class="muted small">Plusieurs salles peuvent être ouvertes en même temps sur des ordinateurs différents : chaque salle a son propre code.</p>
 </div></div>

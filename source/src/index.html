@@ -38,6 +38,11 @@
 .apropos h3{font-size:1.1rem;margin:1rem 0 .3rem}
 .apropos p,.apropos li{color:var(--ink2);font-weight:600}
 .apropos ul{padding-left:1.2rem}
+.revlink{display:flex;align-items:center;gap:.8rem;margin:1rem 0 0;padding:.85rem 1.1rem;background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);text-decoration:none;color:var(--ink);font-weight:700}
+.revlink .ic{width:2.4rem;height:2.4rem;border-radius:12px;background:var(--mint-l);color:var(--mint-d);display:flex;align-items:center;justify-content:center;flex:none}
+.revlink .ic svg{width:1.3rem;height:1.3rem}
+.revlink .go{margin-left:auto;font-weight:900;color:var(--mint-d)}
+.revlink:hover{border-color:var(--mint)}
 </style>
 </head>
 <body>
@@ -52,6 +57,8 @@
     <a class="door prof" href="prof.html"><span class="ic" id="ic-prof"></span><h2>Je suis prof</h2><p>Je choisis les notions, je vérifie les questions et j’ouvre une salle pour ma classe.</p><span class="go">Espace prof →</span></a>
     <a class="door eleve" href="eleve.html"><span class="ic" id="ic-eleve"></span><h2>Je suis élève</h2><p>Je tape le code affiché au tableau, je donne mon prénom et je joue !</p><span class="go">Rejoindre une partie →</span></a>
   </div>
+  <a class="revlink" href="revisions.html"><span class="ic" id="ic-rev"></span><span><b>Révisions</b> · une fiche par notion : exemples corrigés, erreurs à éviter, entraînement</span><span class="go">→</span></a>
+  <a class="revlink" href="eleve.html?melee=1"><span class="ic" id="ic-mel"></span><span><b>Mêlée entre élèves</b> · une partie entre ami(e)s sans prof : chacun choisit sa notion, un téléphone fait tourner le jeu</span><span class="go">→</span></a>
   <div class="feats">
     <div class="feat"><b>3 modes de jeu</b><span>Un contre tous, Duel d’équipes, La Classe VS le Prof.</span></div>
     <div class="feat"><b>Questions variées</b><span>QCM, Vrai/Faux, saisie libre, tuiles à associer, remise en ordre, estimation au curseur, étape fausse à trouver, figures.</span></div>
@@ -82,9 +89,10 @@
 /*@@COMMONJS@@*/
 $("brand").outerHTML=brandHtml("","index.html");
 $("biglogo").innerHTML=logoSvg();
-$("ic-prof").innerHTML=ICO.users;$("ic-eleve").innerHTML=ICO.rocket;
+$("ic-rev").innerHTML=ICO.book;$("ic-mel").innerHTML=ICO.swords;$("ic-prof").innerHTML=ICO.users;$("ic-eleve").innerHTML=ICO.rocket;
 $("foot").innerHTML=footHtml();
 initZoom("index",$("zoom"));
+pwaInit();
 </script>
 </body>
 </html>

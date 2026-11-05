@@ -61,3 +61,4 @@
 body.v-mob .lane{grid-template-columns:4.6rem 1fr;gap:.35rem}
 body.v-mob .ln-name{font-size:.78rem;white-space:normal;line-height:1.1}
 body.v-mob .rocket{width:3.8rem}
+.lsc small.neg{color:var(--coral-d)}

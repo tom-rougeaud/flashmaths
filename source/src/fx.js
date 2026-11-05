@@ -172,6 +172,6 @@ function leaderUpdate(root,list,prevRanks){
     var pr=prevRanks&&prevRanks[x.id]!==undefined?prevRanks[x.id]:i,mv=pr-i;
     return '<div class="lrow'+(i===0?" first":"")+'" style="animation-delay:'+(i*0.08)+'s"><span class="lrk">'+(i+1)+'</span><span class="lnm">'+esc(x.p)+'</span>'+
       (mv>0?'<span class="lmv up">▲'+mv+'</span>':mv<0?'<span class="lmv dn">▼'+(-mv)+'</span>':'<span class="lmv"></span>')+
-      '<span class="lbar"><i style="width:'+Math.max(4,100*x.s/mx)+'%"></i></span><span class="lsc">'+fmtInt(x.s)+(x.dl?'<small>+'+fmtInt(x.dl)+'</small>':"")+'</span></div>';
+      '<span class="lbar"><i style="width:'+Math.max(4,100*x.s/mx)+'%"></i></span><span class="lsc">'+fmtInt(x.s)+(x.dl?'<small'+(x.dl<0?' class="neg"':"")+'>'+(x.dl>0?"+":"−")+fmtInt(Math.abs(x.dl))+'</small>':"")+'</span></div>';
   }).join("")||'<div class="muted" style="text-align:center;padding:1rem">Le classement apparaîtra après la première question.</div>';
 }

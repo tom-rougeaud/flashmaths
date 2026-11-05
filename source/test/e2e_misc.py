@@ -9,7 +9,7 @@ def psql(sql): return subprocess.run(['psql','-h','/tmp','-p','5433','-U','postg
 async def openroom(ctx,mode):
     p=await ctx.new_page();watch(p,'prof-'+mode);await p.set_viewport_size({'width':1280,'height':800})
     await p.goto(B+'prof.html');await p.wait_for_timeout(500)
-    await p.evaluate('P.read=0;P.sel=["lit_dev","lit_reduire","cc_signes"];P.mode="%s";P.fmt="libre";P.nq=3;saveSetup();refreshAll()'%mode)
+    await p.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.read=0;P.sel=["lit_dev","lit_reduire","cc_signes"];P.mode="%s";P.fmt="libre";P.nq=3;saveSetup();refreshAll()'%mode)
     await p.click('#b-gen');await p.wait_for_timeout(300);await p.click('#b-open');await p.wait_for_timeout(900)
     return p,(await p.text_content('#lb-code')).strip()
 async def join(ctx,code,ps,view=None):
@@ -61,7 +61,7 @@ async def main():
         br=await pw.chromium.launch();pg=await br.new_page(viewport={'width':1280,'height':800})
         await pg.route('**/config.js',lambda r:r.fulfill(status=200,content_type='application/javascript',body='var FLASH_CONFIG={SUPABASE_URL:"",SUPABASE_ANON_KEY:""};'))
         await pg.goto(B+'prof.html');await pg.wait_for_timeout(500);await pg.screenshot(path=OUT+'x_noconf.png')
-        await pg.evaluate('P.read=0;P.sel=["cc_signes"];saveSetup();refreshAll()');await pg.click('#b-gen');await pg.wait_for_timeout(300);await pg.click('#b-open');await pg.wait_for_timeout(400);await pg.screenshot(path=OUT+'x_diag.png')
+        await pg.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.read=0;P.sel=["cc_signes"];saveSetup();refreshAll()');await pg.click('#b-gen');await pg.wait_for_timeout(300);await pg.click('#b-open');await pg.wait_for_timeout(400);await pg.screenshot(path=OUT+'x_diag.png')
         for name in ['index','contact','confidentialite']:
             await pg.goto(B+name+'.html');await pg.wait_for_timeout(400);await pg.screenshot(path=OUT+'x_'+name+'.png',full_page=True)
         await pg.set_viewport_size({'width':390,'height':844});await pg.goto(B+'index.html');await pg.wait_for_timeout(300);await pg.screenshot(path=OUT+'x_index_mob.png')

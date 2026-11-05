@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    PAGE PROF — 1. Choisir les notions et régler la partie
 ═══════════════════════════════════════════════════════════════ */
-var P={lvl:"all",sel:[],mode:"duel",nq:10,dur:0,ord:"rand",fmt:"mix",nt:2,tnames:null,hide:false,auto:false,early:true,names:true,view:null,mute:false,vary:true,est:true,read:3,pts:"vite",hd:3,hpen:false};
+var P={lvl:"all",sel:[],mode:"duel",nq:10,dur:0,ord:"rand",fmt:"mix",nt:2,tnames:null,hide:false,auto:false,early:true,names:true,view:null,mute:false,vary:true,est:true,read:3,pts:"vite",hd:3,hpen:false,bet:false,fk:null,diff:0};
 function loadSetup(){var s=store.get("prof",null);if(s&&typeof s==="object")for(var k in P)if(s[k]!==undefined)P[k]=s[k];P.sel=(P.sel||[]).filter(function(id){return !!ITEM_BY_ID[id];});}
 function saveSetup(){store.set("prof",P);}
 function teamNames(){var a=P.tnames&&P.tnames.length?P.tnames:[];return TEAMS.map(function(t,i){return a[i]||t.n;});}
@@ -11,6 +11,18 @@ var NQS=[5,10,15,20];
 var ORDS=[["rand","Mélangé"],["prog","Progressif"]];
 var FMTS=[["qcm","QCM"],["mix","Mixte"],["libre","Saisie libre"]];
 var READS=[[0,"Aucun"],[3,"3 s"],[5,"5 s"]];
+var DIFFS=[[0,"Toutes"],[1,"★ Débutant"],[2,"★★ Initié"],[3,"★★★ Expert"]];
+/* v4.0 : types de questions cochés (P.fk) ; les anciens réglages (format, formats variés, estimation) restent respectés */
+function allFk(){return FMT_KEYS.map(function(x){return x[0];});}
+function profFk(){
+  var fk=(Array.isArray(P.fk)&&P.fk.length?P.fk:allFk()).slice();
+  var rm=function(k){var i=fk.indexOf(k);if(i>=0)fk.splice(i,1);};
+  if(P.fmt==="qcm")rm("libre");
+  if(P.fmt==="libre")fk=fk.filter(function(k){return k==="libre";});
+  if(P.vary===false)["tuiles","etape","intrus","trou","qui","multi"].forEach(rm);
+  if(P.est===false)rm("slider");
+  return fk.length?fk:["qcm"];
+}
 var HDS=[[0,"Aucun"],[3,"+3 s"],[5,"+5 s"],[10,"+10 s"]];
 var PTSM=[["vite","Justesse et rapidité"],["juste","Justesse seule"]];
 var OPEN_CH={};      /* chapitres et sous-chapitres ouverts */
@@ -125,7 +137,7 @@ function updateSel(){
   var n=P.sel.length;
   $("sel-count").textContent=n?n+" notion"+(n>1?"s":"")+" cochée"+(n>1?"s":""):"Aucune notion cochée";
   $("b-gen").disabled=!n;$("b-gen").classList.toggle("pulse",n>0);
-  $("set-sum").textContent=P.nq+" questions, "+(P.dur?fmtDur(P.dur):"temps auto")+", "+FMTS.filter(function(f){return f[0]===P.fmt;})[0][1].toLowerCase()+(P.read?", lecture "+P.read+" s":"")+(P.pts==="juste"?", justesse seule":"");
+  $("set-sum").textContent=P.nq+" questions, "+(P.dur?fmtDur(P.dur):"temps auto")+", "+(function(){var n=profFk().length;return n===FMT_KEYS.length?"tous les types de questions":n+" type"+(n>1?"s":"")+" de questions";})()+(P.diff?", difficulté "+DIFFS[P.diff][1].replace(/★+ /,"").toLowerCase():"")+(P.read?", lecture "+P.read+" s":"")+(P.pts==="juste"?", justesse seule":"")+(P.bet&&P.mode!=="boss"?", pari de certitude":"");
 }
 $("q-search").addEventListener("input",function(){clearTimeout(this._t);this._t=setTimeout(renderTree,150);});
 $("b-clear").addEventListener("click",function(){P.sel=[];saveSetup();renderTree();});
@@ -152,26 +164,31 @@ function renderSettings(){
   $("seg-nq").innerHTML=segHtml(NQS,P.nq);
   $("seg-dur").innerHTML=segHtml(DURS,P.dur);
   $("seg-ord").innerHTML=segHtml(ORDS,P.ord);
-  $("seg-fmt").innerHTML=segHtml(FMTS,P.fmt);
+  var fk=profFk();
+  $("seg-fk").innerHTML=FMT_KEYS.map(function(x){return '<button type="button" data-v="'+x[0]+'"'+(fk.indexOf(x[0])>=0?' class="on"':"")+">"+esc(x[1])+"</button>";}).join("");
+  $("seg-diff").innerHTML=segHtml(DIFFS,P.diff||0);
   $("seg-read").innerHTML=segHtml(READS,P.read);
   $("seg-pts").innerHTML=segHtml(PTSM,P.pts);
   $("seg-nt").innerHTML=segHtml([2,3,4,5,6],P.nt);
   $("w-teams").classList.toggle("hidden",P.mode!=="duel");
   $("w-boss").classList.toggle("hidden",P.mode!=="boss");$("seg-hd").innerHTML=segHtml(HDS,P.hd);$("o-hpen").checked=!!P.hpen;
-  $("o-hide").checked=!!P.hide;$("o-auto").checked=!!P.auto;$("o-early").checked=P.early!==false;$("o-names").checked=P.names!==false;
-  $("o-vary").checked=P.vary!==false;$("o-est").checked=P.est!==false;
+  $("o-bet").checked=!!P.bet;$("o-hide").checked=!!P.hide;$("o-auto").checked=!!P.auto;$("o-early").checked=P.early!==false;$("o-names").checked=P.names!==false;
   updateSel();
 }
 $("modes").addEventListener("click",function(e){var b=e.target.closest(".mode");if(!b)return;P.mode=b.getAttribute("data-m");saveSetup();renderSettings();});
-[["seg-nq","nq",true],["seg-dur","dur",true],["seg-ord","ord",false],["seg-fmt","fmt",false],["seg-nt","nt",true],["seg-read","read",true],["seg-pts","pts",false],["seg-hd","hd",true]].forEach(function(x){
+$("seg-fk").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;var v=b.getAttribute("data-v"),fk=profFk(),i=fk.indexOf(v);
+  if(i>=0){if(fk.length===1){toast("Gardez au moins un type de questions.","ko");return;}fk.splice(i,1);}else fk.push(v);
+  P.fk=fk;P.fmt="mix";P.vary=true;P.est=true;saveSetup();renderSettings();
+});
+[["seg-nq","nq",true],["seg-dur","dur",true],["seg-ord","ord",false],["seg-diff","diff",true],["seg-nt","nt",true],["seg-read","read",true],["seg-pts","pts",false],["seg-hd","hd",true]].forEach(function(x){
   $(x[0]).addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var v=b.getAttribute("data-v");P[x[1]]=x[2]?+v:v;saveSetup();renderSettings();});
 });
 $("o-hide").addEventListener("change",function(){P.hide=this.checked;saveSetup();});
 $("o-auto").addEventListener("change",function(){P.auto=this.checked;saveSetup();});
 $("o-early").addEventListener("change",function(){P.early=this.checked;saveSetup();});
+$("o-bet").addEventListener("change",function(){P.bet=this.checked;saveSetup();refreshAll();});
 $("o-names").addEventListener("change",function(){P.names=this.checked;saveSetup();});
-$("o-vary").addEventListener("change",function(){P.vary=this.checked;saveSetup();});
-$("o-est").addEventListener("change",function(){P.est=this.checked;saveSetup();});
 $("o-hpen").addEventListener("change",function(){P.hpen=this.checked;saveSetup();});
 
 /* ═══ IMPORT DE QUESTIONS (texte avec « * ») ═══ */

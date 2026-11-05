@@ -143,6 +143,29 @@ function Q(r,q,ok,wr,o,expl){
   if(o.lit){res.lit=o.lit;if(o.form)res.form=o.form;}
   return res;
 }
+/* ─── v4.0 : nouveaux formats ───
+   intrus, texte à trous, qui suis-je : un choix unique présenté autrement (q.sub) ;
+   plusieurs bonnes réponses : kind "multi", q.oks = index des bonnes propositions. */
+function QSub(r,sub,q,ok,wr,expl,o){
+  o=o||{};var res=Q(r,q,ok,wr.map(function(w){return Array.isArray(w)?w:[w,"conf"];}),o,expl);
+  res.sub=sub;delete res.num;delete res.lit;delete res.est;return res;
+}
+function QI(r,q,intrus,others,expl,o){return QSub(r,"intrus",q,intrus,others,expl,o);}
+function QT(r,q,ok,wr,expl,o){return QSub(r,"trou",q,ok,wr,expl,o);}
+function QW(r,q,ok,wr,expl,o){return QSub(r,"qui",q,ok,wr,expl,o);}
+function QM(r,q,oks,nos,expl,o){
+  o=o||{};var seen={},list=[];
+  oks.forEach(function(t){t=String(t);if(!seen[t]){seen[t]=1;list.push({t:t,ok:1,err:null});}});
+  nos.forEach(function(w){var t=String(Array.isArray(w)?w[0]:w),e=Array.isArray(w)?w[1]:"conf";if(!seen[t]){seen[t]=1;list.push({t:t,err:e});}});
+  var nOk=list.filter(function(c){return c.ok;}).length;
+  if(nOk<2||list.length-nOk<1)throw new Error("QM : il faut au moins 2 bonnes et 1 fausse proposition");
+  list=list.slice(0,Math.min(5,list.length));
+  var sh=o.keep?list:shuffle(r,list),okIdx=[];
+  sh.forEach(function(c,i){if(c.ok)okIdx.push(i);});
+  var res={kind:"multi",q:q,choices:sh.map(function(c){return {t:c.t,err:c.ok?null:c.err};}),oks:okIdx,ans:okIdx[0],expl:expl||""};
+  if(o.fig)res.fig=o.fig;
+  return res;
+}
 /* Vrai / Faux */
 function VF(r,q,vrai,expl){return {q:q,choices:[{t:"Vrai",err:vrai?null:"conf"},{t:"Faux",err:vrai?"conf":null}],ans:vrai?0:1,expl:expl||"",vf:true};}
 

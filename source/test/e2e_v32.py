@@ -47,7 +47,7 @@ async def main():
         br=await pw.chromium.launch();ctx=await br.new_context();await ctx.add_init_script(MOCK)
         prof=await newpage(ctx,'PROF',1366,860)
         await prof.goto(B+'prof.html');await prof.wait_for_timeout(600)
-        await prof.evaluate('P.read=0;P.sel=["tables"];P.nq=6;P.fmt="mix";P.dur=30;P.mode="solo";P.auto=false;saveSetup();refreshAll()')
+        await prof.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.read=0;P.sel=["tables"];P.nq=6;P.fmt="mix";P.dur=30;P.mode="solo";P.auto=false;saveSetup();refreshAll()')
         await prof.click('#b-gen');await prof.wait_for_timeout(400)
         print('formats forcés :',await prof.evaluate(PICK))
         await prof.wait_for_timeout(300);await prof.screenshot(path=OUT+'p_preview.png',full_page=True)

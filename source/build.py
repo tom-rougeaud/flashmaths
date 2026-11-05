@@ -28,11 +28,14 @@ qrjs=safe_js(io.open(NM+'qrcode-generator/dist/qrcode.js',encoding='utf-8').read
 # favicon (SVG + PNG pour Safari)
 fav=('<link rel="icon" type="image/png" sizes="64x64" href="data:image/png;base64,%s">\n'%b64(os.path.join(here,'assets/fav64.png'))+
      '<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,%s">\n'%b64(os.path.join(here,'assets/fav32.png'))+
-     '<link rel="apple-touch-icon" href="data:image/png;base64,%s">'%b64(os.path.join(here,'assets/apple180.png')))
+     '<link rel="apple-touch-icon" href="data:image/png;base64,%s">\n'%b64(os.path.join(here,'assets/apple180.png'))+
+     '<link rel="manifest" href="manifest.json">\n<meta name="theme-color" content="#262A4F">\n'
+     '<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">\n'
+     '<meta name="apple-mobile-web-app-title" content="Flash Maths">\n<meta name="apple-mobile-web-app-status-bar-style" content="default">')
 LOGO='data:image/png;base64,'+b64(os.path.join(here,'assets/logo256.png'))
 common=safe_js(rd('src/common.js').replace('/*@@LOGOURI@@*/',LOGO))
 fx=safe_js(rd('src/fx.js'))
-bank='\n'.join(rd('src/'+n) for n in ['bank_core.js','bank_items_a.js','bank_items_b.js','bank_items_c.js','bank_items_d.js','bank_items_e.js','bank_items_f.js','bank_curriculum.js','bank_engine.js'])
+bank='\n'.join(rd('src/'+n) for n in ['bank_core.js','bank_items_a.js','bank_items_b.js','bank_items_c.js','bank_items_d.js','bank_items_e.js','bank_items_f.js','bank_items_g.js','bank_curriculum.js','bank_engine.js'])
 bank=safe_js(bank.replace('"use strict";','').split('if(typeof module!=="undefined")module.exports')[0]+'\n'+rd('src/qview.js'))
 cours=json.dumps(json.loads(rd('src/cours.json')),ensure_ascii=False).replace('</','<\\/')
 custom=safe_js(rd('src/custom.js')); progress=safe_js(rd('src/progress.js'))
@@ -49,13 +52,20 @@ def game(h):
             .replace('/*@@COURS@@*/',cours).replace('/*@@KATEXJS@@*/',kjs).replace('/*@@SUPABASE@@*/',supa)
             .replace('/*@@COMMONJS@@*/',common).replace('/*@@FXJS@@*/',fx).replace('/*@@BANK@@*/',bank))
 prof=game(rd('src/prof.html')).replace('/*@@PROFCSS@@*/',rd('src/prof.css')).replace('/*@@QRJS@@*/',qrjs).replace('/*@@CUSTOM@@*/',custom)
-profjs='\n'.join(safe_js(rd('src/'+n)) for n in ['prof_pick.js','prof_preview.js','prof_room.js','prof_game.js','prof_end.js','prof_players.js','prof_init.js'])
+profjs='\n'.join(safe_js(rd('src/'+n)) for n in ['prof_pick.js','prof_preview.js','prof_room.js','prof_game.js','prof_duel.js','prof_end.js','prof_players.js','prof_init.js'])
 w('prof.html',prof.replace('/*@@PROFJS@@*/',profjs))
-el=game(rd('src/eleve.html')).replace('/*@@ELEVECSS@@*/',rd('src/eleve.css')).replace('/*@@PROGRESS@@*/',progress).replace('/*@@ELEVEJS@@*/',safe_js(rd('src/eleve.js')))
+el=game(rd('src/eleve.html')).replace('/*@@ELEVECSS@@*/',rd('src/eleve.css')+'\n'+rd('src/melee.css')).replace('/*@@PROGRESS@@*/',progress).replace('/*@@QRJS@@*/',qrjs).replace('/*@@ELEVEJS@@*/',safe_js(rd('src/melee.js')+'\n'+rd('src/eleve.js')))
 w('eleve.html',el)
+w('revisions.html',game(rd('src/revisions.html')))
 cfg=rd('src/config.js')
 if len(sys.argv)>2:
     cfg='var FLASH_CONFIG={SUPABASE_URL:%s,SUPABASE_ANON_KEY:%s};\n'%(json.dumps(sys.argv[1]),json.dumps(sys.argv[2]))
 w('config.js',cfg)
 w('flash_maths.sql',rd('src/flash_maths.sql'))
+# v4.0 : appli installable (manifest, service worker, icônes)
+VER=re.search(r'FM_VERSION="([^"]+)"',rd('src/common.js')).group(1)
+w('manifest.json',rd('src/manifest.json'))
+w('sw.js',rd('src/sw.js').replace('@@VERSION@@',VER))
+import shutil
+for ic in ['icon-192.png','icon-512.png','icon-maskable-512.png']: shutil.copy(os.path.join(here,'assets',ic),os.path.join(out,ic))
 for fn in sorted(os.listdir(out)): print('%-22s %8d'%(fn,os.path.getsize(os.path.join(out,fn))))

@@ -4,7 +4,7 @@
 var PALETTE=["#D9606A","#4A86CF","#DDA03A","#2E9E7E","#8A6CC9","#C95B82"];
 function endGame(early){
   if(!G)return;
-  clearInterval(G.tick);clearInterval(G.autoT);
+  clearInterval(G.tick);clearInterval(G.autoT);ddCleanup();curtain(false);
   G.phase="end";G.cur=false;
   var played=G.hist.filter(function(h){return h;}),nq=played.length;
   var ranking=rankList(),pod=[],win=null,title="",sub="";
@@ -50,10 +50,10 @@ function endGame(early){
 }
 function endShowBody(){$("end-body").classList.remove("hidden");}
 function renderEndTables(ranking,played){
-  var h='<table class="rank-t"><tr><th>#</th><th>Pseudo</th>'+(G.mode==="duel"?"<th>Équipe</th>":"")+"<th>Points</th><th>Bonnes rép.</th><th>Meilleure série</th></tr>";
-  ranking.forEach(function(x,i){var p=G.players[x.id];h+='<tr class="r"><td>'+(i+1)+"</td><td>"+esc(p.p)+"</td>"+(G.mode==="duel"?"<td>"+(p.team>=0&&G.teams[p.team]?esc(G.teams[p.team].n):"—")+"</td>":"")+"<td>"+fmtInt(p.score)+"</td><td>"+p.ok+" / "+played.length+"</td><td>"+p.best+"</td></tr>";});
+  var h='<table class="rank-t"><tr><th>#</th><th>Pseudo</th>'+(G.mode==="duel"?"<th>Équipe</th>":"")+"<th>Points</th><th>Bonnes rép.</th><th>Meilleure série</th>"+(G.bet?'<th title="Questions où l’élève s’est dit sûr(e) mais s’est trompé(e) : idées fausses à reprendre en priorité">Sûr(e) mais faux</th>':"")+"</tr>";
+  ranking.forEach(function(x,i){var p=G.players[x.id];h+='<tr class="r"><td>'+(i+1)+"</td><td>"+esc(p.p)+"</td>"+(G.mode==="duel"?"<td>"+(p.team>=0&&G.teams[p.team]?esc(G.teams[p.team].n):"—")+"</td>":"")+"<td>"+fmtInt(p.score)+"</td><td>"+p.ok+" / "+played.length+"</td><td>"+p.best+"</td>"+(G.bet?"<td>"+(p.betKo?'<b style="color:var(--coral-d)">'+p.betKo+"</b>":"0")+" / "+(p.bets||0)+" pari"+((p.bets||0)>1?"s":"")+"</td>":"")+"</tr>";});
   $("end-rank").innerHTML=h+"</table>";
-  $("end-qs").innerHTML=played.map(function(hq,i){var pc=Math.round(hq.rate*100),ek=topErr(hq.errs);return '<div class="qbil"><b>'+(i+1)+'</b><div><div>'+rt(hq.q)+'</div><div class="small muted">Réponse : '+rt(hq.ans)+"</div>"+(ek?'<div class="small" style="color:#8A5A00">Erreur la plus fréquente : '+esc(ERR[ek].l)+" ("+hq.errs[ek]+")</div>":"")+'</div><div><div class="qb"><i style="width:'+pc+'%"></i></div><div class="small" style="text-align:right;font-weight:900">'+pc+" %</div></div></div>";}).join("")||'<p class="muted">Aucune question jouée.</p>';
+  $("end-qs").innerHTML=played.map(function(hq,i){var pc=Math.round(hq.rate*100),ek=topErr(hq.errs);return '<div class="qbil"><b>'+(i+1)+'</b><div><div>'+rt(hq.q)+'</div><div class="small muted">Réponse : '+rt(hq.ans)+"</div>"+(hq.bt&&hq.bt[1]?'<div class="small" style="color:var(--coral-d);font-weight:800">'+hq.bt[1]+" élève"+(hq.bt[1]>1?"s":"")+" sûr(e)"+(hq.bt[1]>1?"s":"")+" de soi mais dans l’erreur : idée fausse à reprendre</div>":"")+(ek?'<div class="small" style="color:#8A5A00">Erreur la plus fréquente : '+esc(ERR[ek].l)+" ("+hq.errs[ek]+")</div>":"")+'</div><div><div class="qb"><i style="width:'+pc+'%"></i></div><div class="small" style="text-align:right;font-weight:900">'+pc+" %</div></div></div>";}).join("")||'<p class="muted">Aucune question jouée.</p>';
   $("end-diag").innerHTML=diagHtml(played);
 }
 function topErr(errs){var ks=Object.keys(errs||{}).filter(function(k){return ERR[k]&&k!=="autre";}).sort(function(a,b){return errs[b]-errs[a];});return ks[0]||"";}
@@ -81,8 +81,8 @@ function csvCell(s){s=String(s===undefined||s===null?"":s);return /[;"\n]/.test(
 function csv(rows){return "﻿"+rows.map(function(r){return r.map(csvCell).join(";");}).join("\r\n");}
 $("end-csv1").addEventListener("click",function(){
   if(!G)return;var played=G.hist.filter(function(h){return h;});
-  var rows=[["Rang","Pseudo"].concat(G.mode==="duel"?["Équipe"]:[]).concat(["Points","Bonnes réponses","Questions"]).concat(played.map(function(h,i){return "Q"+(i+1);}))];
-  rankList().forEach(function(x,i){var p=G.players[x.id];rows.push([i+1,p.p].concat(G.mode==="duel"?[p.team>=0&&G.teams[p.team]?G.teams[p.team].n:""]:[]).concat([p.score,p.ok,played.length]).concat(played.map(function(h){var a=p.ans[h.i];return !a||!a.an?"—":a.ok?"juste":a.pa?"presque":"faux"+(a.e&&ERR[a.e]&&a.e!=="autre"?" ("+ERR[a.e].l+")":"");})));});
+  var rows=[["Rang","Pseudo"].concat(G.mode==="duel"?["Équipe"]:[]).concat(["Points","Bonnes réponses","Questions"]).concat(G.bet?["Paris","Sûr(e) mais faux"]:[]).concat(played.map(function(h,i){return "Q"+(i+1);}))];
+  rankList().forEach(function(x,i){var p=G.players[x.id];rows.push([i+1,p.p].concat(G.mode==="duel"?[p.team>=0&&G.teams[p.team]?G.teams[p.team].n:""]:[]).concat([p.score,p.ok,played.length]).concat(G.bet?[p.bets||0,p.betKo||0]:[]).concat(played.map(function(h){var a=p.ans[h.i];return !a||!a.an?"—":(a.ok?"juste":a.pa?"presque":"faux"+(a.e&&ERR[a.e]&&a.e!=="autre"?" ("+ERR[a.e].l+")":""))+(a.bt?" [sûr(e)]":"");})));});
   download("flash_maths_resultats_"+G.code+".csv",csv(rows),"text/csv;charset=utf-8");
 });
 $("end-csv2").addEventListener("click",function(){
@@ -165,7 +165,7 @@ function runDiag(){
   rpc("fm_ping",{}).then(function(r){
     var ok=r&&r.ok;
     var x=dl(ok,ok?"Base de données opérationnelle (version "+r.version+", "+r.rooms+" salle(s) active(s))":"Réponse inattendue de la base");
-    if(ok&&r.version<4)x+=dl(false,"Votre base est en version "+r.version+" : relancez le script <code>flash_maths.sql</code> dans Supabase (SQL Editor → Run) pour activer le code prof.");
+    if(ok&&r.version<5)x+=dl(false,"Votre base est en version "+r.version+" : relancez le script <code>flash_maths.sql</code> dans Supabase (SQL Editor → Run) pour activer "+(r.version<4?"le code prof et ":"")+"la Mêlée entre élèves.");
     $("diag-db").innerHTML=x+dl(true,"Test du temps réel en cours…");
     var code="T"+Math.floor(Math.random()*900+100);
     return openChannel("diag-"+code,function(){},null).then(function(ch){ch.close();$("diag-db").innerHTML=x+dl(true,"Temps réel opérationnel : tout est prêt pour jouer !");netPill("ok","Base connectée");})

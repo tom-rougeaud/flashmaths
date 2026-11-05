@@ -14,7 +14,7 @@ async def stud(ctx,code,name,w=390):
     s=await ctx.new_page();watch(s,name);await s.add_init_script(CLR);await s.set_viewport_size({'width':w,'height':800})
     await s.goto(B+'eleve.html?c='+code);await s.wait_for_timeout(500);await s.fill('#ps-in',name);await s.click('#ps-go');await s.wait_for_timeout(400);return s
 async def open_room(prof,mode,nq=3):
-    await prof.evaluate('P.read=0;P.sel=["tables","pct_mental"];P.vary=false;P.est=false;P.nq=%d;P.mode="%s";P.auto=false;P.dur=15;saveSetup();refreshAll()'%(nq,mode))
+    await prof.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.read=0;P.sel=["tables","pct_mental"];P.vary=false;P.est=false;P.nq=%d;P.mode="%s";P.auto=false;P.dur=15;saveSetup();refreshAll()'%(nq,mode))
     await prof.click('#b-gen');await prof.wait_for_timeout(300);await prof.click('#b-open');await prof.wait_for_timeout(900)
     return (await prof.text_content('#lb-code')).strip()
 async def answer_all(prof,studs,good):

@@ -19,6 +19,11 @@ function coursQuestion(r,v){
   if(v.or)return QO(r,v.q,v.or,v.x,{how:v.how,sep:v.sep,fig:v.fig});
   if(v.es)return QE(r,v.q,v.es.v,{u:v.es.u,min:v.es.min,max:v.es.max,tol:v.es.tol,fig:v.fig},v.x);
   if(v.st)return QX(r,v.q,v.st,v.bad,v.x,o);
+  /* v4.0 : intrus (it = l’intrus, ot = les autres), texte à trous (tr), qui suis-je (qui), plusieurs bonnes réponses (mu / no) */
+  if(v.it)return QI(r,v.q,v.it,v.ot,v.x,o);
+  if(v.mu)return QM(r,v.q,v.mu,v.no,v.x,o);
+  if(v.tr)return QT(r,v.q,v.ok,v.wr,v.x,o);
+  if(v.qui)return QW(r,v.q,v.ok,v.wr,v.x,o);
   o.keep=!!v.keep;
   return Q(r,v.q,v.ok,v.wr.map(function(w){return Array.isArray(w)?w:[w,"conf"];}),o,v.x);
 }
@@ -53,6 +58,7 @@ function validQ(q){
   if(k==="assoc")return q.L&&q.L.length>=2&&q.L.length<=5&&q.R.length===q.L.length;
   if(k==="ordre")return q.D&&q.D.length>=3&&q.D.length<=6;
   if(k==="slider")return q.sl&&q.sl.max>q.sl.min&&q.sl.ans>=q.sl.min&&q.sl.ans<=q.sl.max;
+  if(k==="multi")return q.choices&&q.choices.length>=3&&q.choices.length<=5&&q.oks&&q.oks.length>=2&&q.oks.length<q.choices.length;
   return q.choices&&q.choices.length<=4&&(q.choices.length>=2||(q.only==="libre"&&q.choices.length===1));
 }
 /* « forme » d’une question : l’énoncé sans ses nombres (deux questions de même forme
@@ -89,6 +95,7 @@ function drawQuestions(itemIds,n,ctx,seed,avoid){
       if(!c||seenT[c.q])continue;
       var sc=0,sh=qShape(c);
       if(ctx&&ctx.plain&&c.kind)sc+=5000;
+      if(ctx&&ctx.fk&&!fmtAllowed(c,ctx.fk))sc+=5000;
       if(H.t[c.q])sc+=1000+H.t[c.q]/H.n*500;
       if(usedS[sh])sc+=320*usedS[sh];
       if(H.s[sh])sc+=60+180*H.s[sh]/H.n;
@@ -96,6 +103,7 @@ function drawQuestions(itemIds,n,ctx,seed,avoid){
       if(sc<bestS){best=c;bestS=sc;if(sc===0&&k>=3)break;}
     }
     if(!best)continue;
+    if(ctx&&ctx.fk&&!fmtAllowed(best,ctx.fk))continue;   /* aucun format permis pour cette notion */
     /* forme déjà utilisée dans cette partie : on laisse d’abord sa chance aux autres notions */
     if(bestS>=320&&bestS<5000&&pool.length&&skipped<itemIds.length){pool.push(id);skipped++;continue;}
     seenT[best.q]=1;var s2=qShape(best);usedS[s2]=(usedS[s2]||0)+1;kinds.push(qKind(best));out.push(best);lastId=id;skipped=0;
@@ -111,6 +119,8 @@ function dureeQuestion(q,mode,libre){
   if(k==="assoc")return base+(q.L&&q.L.length>3?20:15);
   if(k==="ordre")return base+15;
   if(k==="slider")return base+5;
+  if(k==="multi")return base+12;
+  if(q.sub==="qui"||q.sub==="intrus")base+=5;
   if(q.qx||q.fig)base+=10;
   return libre?base+15:base;
 }
@@ -316,9 +326,18 @@ function checkTyped(q,str){
    FORMATS : nature, réponse officielle, données envoyées aux élèves, correction
 ═══════════════════════════════════════════════════════════════ */
 function qKind(q){if(!q)return "qcm";if(q.kind)return q.kind;return q.libre?"libre":q.vf?"vf":"qcm";}
-var KIND_TAG={libre:["Saisie libre · ×1,5","t-sky"],vf:["Vrai ou faux ?","t-sun"],assoc:["Associe les tuiles","t-pink"],ordre:["Remets dans l’ordre","t-mint"],slider:["Estime avec le curseur","t-sun"]};
+var KIND_TAG={multi:["Plusieurs bonnes réponses","t-pink"],intrus:["Trouve l’intrus","t-coral"],trou:["Texte à trous","t-mint"],qui:["Qui suis-je ?","t-sky"],libre:["Saisie libre · ×1,5","t-sky"],vf:["Vrai ou faux ?","t-sun"],assoc:["Associe les tuiles","t-pink"],ordre:["Remets dans l’ordre","t-mint"],slider:["Estime avec le curseur","t-sun"]};
+/* v4.0 : type de question pour les cases « Types de questions » (prof, entraînement) */
+var FMT_KEYS=[["qcm","QCM"],["vf","Vrai ou faux"],["libre","Saisie libre"],["slider","Estimation au curseur"],["tuiles","Tuiles et remise en ordre"],["etape","Étape fausse"],["intrus","Intrus"],["trou","Texte à trous"],["qui","Qui suis-je ?"],["multi","Plusieurs bonnes réponses"]];
+function fmtKey(q){var k=qKind(q);if(k==="assoc"||k==="ordre")return "tuiles";if(k==="slider"||k==="multi"||k==="vf"||k==="libre")return k;if(q.sub)return q.sub;if(q.qx)return "etape";return "qcm";}
+/* la question (avant conversion en saisie libre ou en curseur) est-elle permise par la liste fk ? */
+function fmtAllowed(q,fk){
+  if(!fk)return true;var k=fmtKey(q);
+  if(k==="qcm")return fk.indexOf("qcm")>=0||(fk.indexOf("libre")>=0&&isFree(q))||(fk.indexOf("slider")>=0&&!!q.est);
+  return fk.indexOf(k)>=0;
+}
 function kindTagHtml(q){
-  var k=qKind(q),t=KIND_TAG[k],h=t?'<span class="tag '+t[1]+'">'+t[0]+"</span>":"";
+  var k=qKind(q),t=KIND_TAG[k]||(q.sub&&k==="qcm"?KIND_TAG[q.sub]:null),h=t?'<span class="tag '+t[1]+'">'+t[0]+"</span>":"";
   if(q.qx)h+='<span class="tag t-coral">Trouve l’erreur</span>';
   return h;
 }
@@ -327,6 +346,7 @@ function answerText(q){
   var k=qKind(q);
   if(k==="assoc"){var o=[];for(var j=0;j<q.R.length;j++)o[q.rk[j]]=q.L[q.rk[j]]+" → "+q.R[j];return o.join("\n");}
   if(k==="ordre"){var it=[];for(var i=0;i<q.D.length;i++)it[q.op[i]]=q.D[i];return it.join(q.sep||" ; ");}
+  if(k==="multi")return q.oks.map(function(i){return q.choices[i].t;}).join(" · ");
   if(k==="slider")return "≈ "+f(q.sl.ans,Math.max(q.sl.d,Math.min(3,decOf(q.sl.ans))))+(q.sl.u?" "+q.sl.u:"");
   if(k==="libre"){
     if(q.lit)return q.choices[q.ans]?q.choices[q.ans].t:q.lit;
@@ -340,6 +360,7 @@ function qPublic(q){
   if(q.id&&ITEM_BY_ID[q.id]&&!ITEM_BY_ID[q.id].custom)o.id=q.id;
   if(q.fig)o.fig=q.fig;
   if(q.qx)o.qx=1;
+  if(q.sub)o.sb=q.sub;
   if(k==="libre"){o.fr=1;o.kb=q.lit?"lit":"num";o.u=q.unit||"";}
   else if(k==="assoc"){o.L=q.L;o.R=q.R;}
   else if(k==="ordre"){o.D=q.D;o.how=q.how||"";o.sep=q.sep||"";}
@@ -364,6 +385,13 @@ function judge(q,a){
     }
     res.c=good;res.ok=good===n;res.part=res.ok?1:Math.round(50*good/n)/100;
     if(!res.ok)res.err=k==="assoc"?"assoc":"ordre2";
+  }else if(k==="multi"){
+    /* toutes les bonnes et aucune fausse : juste ; au moins la moitié des bonnes sans fausse : points partiels */
+    var sel=Array.isArray(v)?v:[],hit=0,bad=0,seenM={};
+    sel.forEach(function(t){t=t|0;if(seenM[t])return;seenM[t]=1;if(q.oks.indexOf(t)>=0)hit++;else bad++;});
+    res.c=hit;res.ok=bad===0&&hit===q.oks.length;
+    res.part=res.ok?1:(bad===0&&hit*2>=q.oks.length?0.5:0);
+    if(!res.ok){var wb=sel.filter(function(t){return q.oks.indexOf(t|0)<0;})[0];res.err=wb!==undefined&&q.choices[wb|0]?q.choices[wb|0].err||"conf":"conf";}
   }else if(k==="slider"){
     var x=+v;
     if(isFinite(x)){
@@ -387,7 +415,8 @@ function qCorr(q){
   if(k==="assoc"){var c=[];for(var j=0;j<q.rk.length;j++)c[q.rk[j]]=j;return c;}
   if(k==="ordre"){var o=[];for(var i=0;i<q.op.length;i++)o[q.op[i]]=i;return o;}
   if(k==="slider")return {a:q.sl.ans,t:q.sl.tol};
+  if(k==="multi")return q.oks.slice();
   return null;
 }
 
-if(typeof module!=="undefined")module.exports={qShape:qShape,normHist:normHist,judge:judge,isFree:isFree,answerText:answerText,qPublic:qPublic,qKind:qKind,qCorr:qCorr,toSlider:toSlider,figHtml:figHtml,QE:QE,mulberry32:mulberry32,BANK:BANK,NIVEAUX:NIVEAUX,METIERS:METIERS,ERR:ERR,makeQuestion:makeQuestion,drawQuestions:drawQuestions,buildTree:buildTree,ITEM_BY_ID:ITEM_BY_ID,f:f,checkTyped:checkTyped,parseNumber:parseNumber,parseExpr:parseExpr,isFree:isFree,dureeQuestion:dureeQuestion};
+if(typeof module!=="undefined")module.exports={fmtKey:fmtKey,fmtAllowed:fmtAllowed,FMT_KEYS:FMT_KEYS,qShape:qShape,normHist:normHist,judge:judge,isFree:isFree,answerText:answerText,qPublic:qPublic,qKind:qKind,qCorr:qCorr,toSlider:toSlider,figHtml:figHtml,QE:QE,mulberry32:mulberry32,BANK:BANK,NIVEAUX:NIVEAUX,METIERS:METIERS,ERR:ERR,makeQuestion:makeQuestion,drawQuestions:drawQuestions,buildTree:buildTree,ITEM_BY_ID:ITEM_BY_ID,f:f,checkTyped:checkTyped,parseNumber:parseNumber,parseExpr:parseExpr,isFree:isFree,dureeQuestion:dureeQuestion};

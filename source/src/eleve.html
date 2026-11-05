@@ -27,6 +27,8 @@
       <div class="menu hidden" id="menu">
         <button type="button" data-m="train">S’entraîner seul</button>
         <button type="button" data-m="carnet">Mon carnet</button>
+        <a href="revisions.html">Révisions (fiches par notion)</a>
+        <button type="button" data-m="pwa">Installer l’appli sur cet appareil</button>
         <button type="button" data-m="sound" id="m-sound">Activer le son</button>
         <button type="button" data-m="leave" id="m-leave" class="hidden">Quitter la salle</button>
         <a href="contact.html">Contact</a>
@@ -47,13 +49,15 @@
     <div class="alt">
       <button type="button" class="btn btn-soft" id="go-train"></button>
       <button type="button" class="btn btn-soft" id="go-carnet"></button>
+      <a class="btn btn-soft" id="go-rev" href="revisions.html"></a>
+      <button type="button" class="btn btn-soft" id="go-melee"></button>
     </div>
   </section>
 
   <!-- pseudo -->
   <section id="s-pseudo" class="screen hidden">
     <div class="card ps-card">
-      <div class="ps-room">Salle <b id="ps-code">····</b> <button type="button" class="btn btn-ghost btn-sm" id="ps-back">changer</button></div>
+      <div class="ps-room"><span id="ps-lbl">Salle</span> <b id="ps-code">····</b> <button type="button" class="btn btn-ghost btn-sm" id="ps-back">changer</button></div>
       <h1 class="big-t">Ton prénom</h1>
       <div class="ps-row">
         <input class="inp ps-in" id="ps-in" maxlength="16" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Ton prénom" aria-label="Ton prénom">
@@ -75,12 +79,18 @@
   <section id="s-cd" class="screen hidden"><div class="cd"><div class="cd-bulbs" id="cd-b" aria-hidden="true"><i></i><i></i><i></i></div><span id="cd-t">Prêt ?</span></div></section>
 
   <!-- question -->
+  <section id="s-vote" class="screen hidden">
+    <div class="card center vote-card"><div class="tag t-coral" id="v-tag">Duel direct</div><h2 id="v-t">Vote pour ton champion</h2><p class="muted" id="v-sub"></p>
+      <div class="vlist" id="v-list"></div><div class="vsec" id="v-sec"></div></div>
+  </section>
   <section id="s-q" class="screen hidden">
-    <div class="q-top"><span class="chip" id="q-n">1 / 10</span><span class="chip q-sc" id="q-sc">0 pts</span></div>
+    <div class="q-top"><span class="chip" id="q-n">1 / 10</span><button type="button" class="chip tr-pause hidden" id="tr-pause" title="Mettre la série en pause (cette question sera retirée)">❚❚ Pause</button><span class="chip q-sc" id="q-sc">0 pts</span></div>
     <div class="tbar"><i id="q-bar"></i><b id="q-sec"></b></div>
     <div class="readbar hidden" id="q-read"><span class="rb-bulb"></span><span>Lis bien l’énoncé, les propositions arrivent…</span></div>
     <div class="card q-card"><div class="q-tag" id="q-tag"></div><div class="q-txt" id="q-txt"></div></div>
+    <button type="button" class="betb hidden" id="q-bet" aria-pressed="false"><span class="bx" aria-hidden="true"></span><span><b>Je suis sûr(e)</b> <small>×2 si juste · −300 si faux</small></span></button>
     <div class="answers" id="q-ans"></div>
+    <button type="button" class="btn btn-go btn-big btn-block q-mok hidden" id="q-mok"></button>
     <div class="free hidden" id="q-free">
       <label class="fbox" id="f-box"><input id="f-in" type="text" inputmode="none" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="20" placeholder="ta réponse" aria-label="Ta réponse (clavier de l’ordinateur ou touches ci-dessous)"><small id="f-unit"></small></label>
       <div class="fhint small muted" id="f-hint">Tape ta réponse au clavier de l’ordinateur ou avec les touches ci-dessous, puis Entrée.</div>
@@ -95,7 +105,8 @@
     <div class="rv-card" id="rv-card"></div>
     <div id="rv-extra"></div>
     <div class="rv-wait" id="rv-wait"><div class="dots"><span></span><span></span><span></span></div><span>Attends la question suivante…</span></div>
-    <div class="rv-next hidden" id="rv-next"><button type="button" class="btn btn-go btn-big btn-block" id="tr-next">Question suivante</button></div>
+    <div class="alt hidden" id="mel-nx"><button type="button" class="btn btn-go btn-big hidden" id="mel-next">Question suivante</button><p class="center muted" id="mel-nxt"></p></div>
+    <div class="rv-next hidden" id="rv-next"><button type="button" class="btn btn-ghost" id="tr-pause2">❚❚ Pause</button><button type="button" class="btn btn-go btn-big" id="tr-next">Question suivante</button></div>
   </section>
 
   <!-- fin -->
@@ -114,9 +125,10 @@
       <h1 class="big-t">S’entraîner seul</h1>
       <p class="muted">Sans connexion, à ton rythme. Rien n’est envoyé : ta progression reste sur cet appareil.</p>
       <label class="lbl">Niveau</label><div class="seg" id="tr-niv"></div>
-      <label class="lbl">Chapitre</label><select class="inp" id="tr-chap"></select>
+      <div class="tr-resume hidden" id="tr-resume"></div>
+      <label class="lbl">Chapitres <small class="muted" id="tr-chn"></small></label><div class="chipsel" id="tr-chaps"></div>
       <label class="lbl">Nombre de questions</label><div class="seg" id="tr-nq"></div>
-      <label class="lbl">Réponses</label><div class="seg" id="tr-fmt"></div>
+      <label class="lbl">Types de questions <small class="muted">(un ou plusieurs)</small></label><div class="chipsel" id="tr-fk"></div>
       <label class="sw" style="margin-top:.8rem"><input type="checkbox" id="tr-prog" checked><i></i>Difficulté progressive (s’adapte à tes réussites)</label>
       <div class="alt"><button type="button" class="btn btn-ghost" id="tr-back">← Retour</button><button type="button" class="btn btn-go btn-big" id="tr-go">C’est parti !</button></div>
     </div>
@@ -139,9 +151,12 @@
   <div id="foot"></div>
 </main>
 
+<div class="mel-qrbig hidden" id="mel-qrbig"><div class="mq-card"><div class="mq-q" id="mq-q"></div><div class="mq-c" id="mq-c"></div><div class="muted small" id="mq-u"></div><div class="muted small" id="mq-n"></div><button type="button" class="btn btn-go" id="mq-x">Fermer</button></div></div>
+
 <script type="application/json" id="fm-cours">/*@@COURS@@*/</script>
 <script>/*@@KATEXJS@@*/</script>
 <script>/*@@SUPABASE@@*/</script>
+<script>/*@@QRJS@@*/</script>
 <script src="config.js"></script>
 <script>
 /*@@COMMONJS@@*/

@@ -25,7 +25,7 @@ async def main():
         # ---------- Duel : renommage + glisser-déposer ----------
         prof=await newpage(ctx,'PROF',1366,860)
         await prof.goto(B+'prof.html');await prof.wait_for_timeout(600)
-        await prof.evaluate('P.read=0;P.sel=["relatifs","pct_mental"];P.nq=2;P.fmt="qcm";P.dur=15;P.mode="duel";P.nt=2;P.auto=false;P.tnames=null;saveSetup();refreshAll()')
+        await prof.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.read=0;P.sel=["relatifs","pct_mental"];P.nq=2;P.fmt="qcm";P.dur=15;P.mode="duel";P.nt=2;P.auto=false;P.tnames=null;saveSetup();refreshAll()')
         await prof.click('#b-gen');await prof.wait_for_timeout(400);await prof.click('#b-open');await prof.wait_for_timeout(900)
         code=(await prof.text_content('#lb-code')).strip()
         s1=await join(ctx,code,'Léa')
@@ -53,7 +53,7 @@ async def main():
         await prof.click('#lb-close');await prof.click('#lb-close');await prof.wait_for_timeout(600)
         for s in (s1,s2): await s.close()
         # ---------- Boss : handicap 5 s ----------
-        await prof.evaluate('show("s-pick");P.mode="boss";P.hd=5;P.hpen=true;P.nq=2;saveSetup();refreshAll()')
+        await prof.evaluate('show("s-pick");P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.mode="boss";P.hd=5;P.hpen=true;P.nq=2;saveSetup();refreshAll()')
         await prof.click('#b-gen');await prof.wait_for_timeout(400);await prof.click('#b-open');await prof.wait_for_timeout(900)
         code=(await prof.text_content('#lb-code')).strip()
         a=await join(ctx,code,'Nina');b=await join(ctx,code,'Omar')

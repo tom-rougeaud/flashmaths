@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Flash Maths — Révisions</title>
+<!--@@FAVICON@@-->
+<style>
+/*@@THEMECSS@@*/
+/*@@KATEXCSS@@*/
+.wrap{max-width:60rem;margin:0 auto;padding:.6rem 1rem 2rem}
+h1{font-size:2rem;margin:.8rem 0 .2rem}
+.lead{color:var(--ink2);margin:0 0 .9rem}
+.bar{position:sticky;top:3.6rem;z-index:30;background:rgba(246,247,251,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:.5rem 0 .6rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.bar .inp{flex:1 1 14rem;margin:0}
+.bar .seg button{padding:.4rem .7rem;font-size:.85rem}
+.rinfo{font-weight:700;color:var(--ink2);font-size:.9rem;margin:.2rem 0 .4rem;min-height:1.2rem}
+.fiche h3 svg,.acts svg{width:1.1rem;height:1.1rem;flex:none}
+details.chap{margin:.45rem 0;border-radius:14px;border:1px solid var(--line);background:#fff;overflow:hidden}
+details.chap>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:.6rem;padding:.75rem .9rem;font-weight:900;background:color-mix(in srgb,var(--lc) 9%,#fff);border-left:5px solid var(--lc)}
+details.chap>summary::-webkit-details-marker,details.sub>summary::-webkit-details-marker,details.nt>summary::-webkit-details-marker{display:none}
+details.chap>summary:after,details.sub>summary:after,details.nt>summary:after{content:"";margin-left:auto;width:.5rem;height:.5rem;border-right:2.5px solid var(--ink3);border-bottom:2.5px solid var(--ink3);transform:rotate(45deg);transition:transform .2s;flex:none}
+details[open]>summary:after{transform:rotate(225deg)}
+details.chap>.subs{padding:.4rem .7rem .7rem 1.2rem}
+.cnt{font-size:.78rem;font-weight:900;color:var(--ink2);background:#EEF0F6;border-radius:999px;padding:.08rem .55rem;white-space:nowrap}
+details.sub{margin:.35rem 0;border-left:2px solid var(--line2);border-radius:0 12px 12px 0;background:#F4F5F9}
+details.sub>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;font-weight:800}
+details.sub>.nts{padding:.1rem .45rem .5rem .9rem}
+details.nt{margin:.3rem 0;background:#fff;border:1px solid var(--line);border-radius:12px}
+details.nt>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:.6rem;padding:.55rem .75rem;font-weight:800}
+details.nt>summary .dst{color:var(--sun-d);font-size:.8rem;letter-spacing:-.05em;white-space:nowrap}
+details.nt[open]{box-shadow:var(--sh)}
+.fiche{padding:.2rem .9rem .9rem;border-top:1px solid var(--line)}
+.fiche h3{font-size:.95rem;color:var(--ink2);margin:.9rem 0 .4rem;display:flex;align-items:center;gap:.45rem}
+.ex{background:#FBFBFE;border:1px solid var(--line);border-radius:12px;padding:.7rem .85rem;margin:.4rem 0}
+.ex .eq{font-weight:800;line-height:1.4}
+.ex .ans{margin-top:.5rem;display:inline-block;background:var(--mint-l);color:var(--mint-d);font-weight:900;border-radius:10px;padding:.2rem .6rem;white-space:pre-line}
+.ex .xp{margin-top:.45rem;color:var(--ink);line-height:1.45}
+.ex .tags{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.35rem}
+.ex .fig{margin:.5rem auto .2rem}
+.errs{display:flex;flex-direction:column;gap:.35rem;margin:0;padding:0;list-style:none}
+.errs li{display:flex;gap:.6rem;align-items:flex-start;background:var(--coral-l);border-radius:10px;padding:.45rem .65rem;line-height:1.35}
+.errs li b{flex:none;min-width:1.8rem;text-align:center;color:var(--coral-d)}
+.cc{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.35rem}
+.cc li{background:var(--violet-l);border-radius:10px;padding:.45rem .65rem;line-height:1.4}
+.acts{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem}
+.none{padding:1rem;color:var(--ink2);font-weight:700}
+mark{background:var(--bulb-l);color:inherit;border-radius:3px;padding:0 .1em}
+@media print{.top,.bar,.acts,#foot{display:none}details.nt{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="top"><span id="brand"></span><span class="sp"></span><div class="tools"><div class="zoom" id="zoom"></div></div></header>
+<main class="wrap">
+  <h1>Révisions</h1>
+  <p class="lead">Une fiche par notion du programme : des exemples corrigés pas à pas, les erreurs à éviter et les questions de cours du chapitre. Touche « S’entraîner » pour t’exercer sur la notion.</p>
+  <div class="bar">
+    <input class="inp" id="q" type="search" placeholder="Rechercher une notion (ex. pourcentage, Pythagore, fonction…)" aria-label="Rechercher une notion">
+    <div class="seg" id="niv" role="group" aria-label="Niveau"></div>
+  </div>
+  <div class="rinfo" id="info"></div>
+  <div id="tree"></div>
+  <div id="foot"></div>
+</main>
+<script type="application/json" id="fm-cours">/*@@COURS@@*/</script>
+<script>/*@@KATEXJS@@*/</script>
+<script>
+/*@@COMMONJS@@*/
+/*@@BANK@@*/
+(function(){
+"use strict";
+var NIV=store.get("rev_niv","cap"),Q="";
+var COURS=(function(){try{return JSON.parse(document.getElementById("fm-cours").textContent).items||[];}catch(e){return [];}})();
+function norm(s){s=String(s||"").toLowerCase();return s.normalize?s.normalize("NFD").replace(/[̀-ͯ]/g,""):s;}
+function stars(d){return "★★★".slice(0,d||1)+'<span style="opacity:.25">'+"★★★".slice(d||1)+"</span>";}
+var DLAB={1:"débutant",2:"initié",3:"expert"};
+function hit(it){if(!Q)return true;return norm(it.titre+" "+it.chap+" "+(it.tags||[]).join(" ")).indexOf(Q)>=0;}
+function render(){
+  $("niv").innerHTML=NIVEAUX.map(function(n){return '<button type="button" data-v="'+n.id+'"'+(NIV===n.id?' class="on"':"")+">"+esc(n.court)+"</button>";}).join("");
+  var br=buildTree().filter(function(b){return b.niv.id===NIV;})[0],h="",n=0;
+  if(br)br.chaps.forEach(function(ch){
+    var subs="",cnt=0;
+    ch.subs.forEach(function(sc){
+      var its=sc.items.filter(function(it){return !it.custom&&hit(it);});if(!its.length)return;cnt+=its.length;
+      subs+='<details class="sub"'+(Q?" open":"")+'><summary><span>'+esc(sc.nom)+'</span><span class="cnt">'+its.length+'</span></summary><div class="nts">'+its.map(function(it){
+        return '<details class="nt" data-id="'+esc(it.id)+'"><summary><span>'+esc(it.titre)+'</span><span class="dst" title="Niveau : '+DLAB[it.d||1]+'">'+stars(it.d)+"</span></summary></details>";}).join("")+"</div></details>";
+    });
+    if(!cnt)return;n+=cnt;
+    h+='<details class="chap" style="--lc:'+br.niv.color+'"'+(Q?" open":"")+'><summary><span>'+esc(ch.nom)+'</span><span class="cnt">'+cnt+" notion"+(cnt>1?"s":"")+"</span></summary><div class=\"subs\">"+subs+"</div></details>";
+  });
+  $("tree").innerHTML=h||'<div class="none">Aucune notion ne correspond à « '+esc($("q").value)+' ».</div>';
+  $("info").textContent=n+" notion"+(n>1?"s":"")+(Q?" trouvée"+(n>1?"s":""):" en "+((NIVEAUX.filter(function(x){return x.id===NIV;})[0]||{}).label||""));
+}
+/* ─── fiche d’une notion : exemples générés par le même moteur que le jeu (donc toujours justes) ─── */
+function examples(id,n){
+  var out=[],seen={},shapes={};
+  for(var k=0;k<40&&out.length<n;k++){
+    var q=makeQuestion(id,(Math.random()*1e9)>>>0,{metiers:Object.keys(METIERS)});
+    if(!q||seen[q.q])continue;var sh=qShape(q);if(shapes[sh]&&k<25)continue;
+    seen[q.q]=1;shapes[sh]=1;out.push(q);
+  }
+  return out;
+}
+function exHtml(q){
+  var ans=answerText(q);
+  return '<div class="ex"><div class="tags">'+kindTagHtml(q)+'</div><div class="eq">'+rt(q.q)+"</div>"+figBlock(q.fig)+
+    '<div class="ans">'+rt(ans)+"</div>"+(q.expl?'<div class="xp">'+rt(q.expl)+"</div>":"")+"</div>";
+}
+/* erreurs types les plus fréquentes : relevées dans les propositions fausses de 30 questions de la notion */
+function topErrs(id){
+  var c={};
+  for(var k=0;k<30;k++){var q=makeQuestion(id,(k*7919+11)>>>0,{});if(!q||!q.choices)continue;q.choices.forEach(function(ch,i){if(i!==q.ans&&ch.err&&ERR[ch.err]&&ERR[ch.err].s)c[ch.err]=(c[ch.err]||0)+1;});}
+  return Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,3);
+}
+function coursOf(it){
+  var tags=it.tags||[],out=[];
+  COURS.forEach(function(cc){
+    if(cc.niv.indexOf(NIV)<0)return;
+    var sameChap=norm(cc.chap)===norm(it.chap),common=(cc.tags||[]).some(function(t){return t!=="cours"&&tags.indexOf(t)>=0;});
+    if(!sameChap&&!common)return;
+    cc.qs.forEach(function(x){if(x.x&&(common||out.length<3))out.push({cc:cc,x:x,s:common?2:1});});
+  });
+  out.sort(function(a,b){return b.s-a.s;});
+  return out.slice(0,3).map(function(o){return o.x.x;});
+}
+function fiche(det){
+  var id=det.getAttribute("data-id"),it=ITEM_BY_ID[id];if(!it)return;
+  var exs=examples(id,2),errs=topErrs(id),cc=coursOf(it),h='<div class="fiche">';
+  h+='<h3>'+ICO.check+"Exemples corrigés</h3><div class=\"exs\">"+exs.map(exHtml).join("")+"</div>";
+  if(errs.length)h+="<h3>"+ICO.cross+"Erreurs à éviter</h3><ul class=\"errs\">"+errs.map(function(e){return "<li><b>"+esc(ERR[e].e)+"</b><span>"+esc(ERR[e].s)+"</span></li>";}).join("")+"</ul>";
+  if(cc.length)h+="<h3>"+ICO.star+"À retenir (questions de cours)</h3><ul class=\"cc\">"+cc.map(function(x){return "<li>"+rt(x)+"</li>";}).join("")+"</ul>";
+  h+='<div class="acts"><button type="button" class="btn btn-soft" data-a="more">'+ICO.refresh+'Autres exemples</button><a class="btn btn-go" href="eleve.html?train='+encodeURIComponent(id)+'">'+ICO.rocket+"S’entraîner sur cette notion</a></div></div>";
+  var old=det.querySelector(".fiche");if(old)old.remove();
+  det.insertAdjacentHTML("beforeend",h);
+}
+$("tree").addEventListener("toggle",function(e){var d=e.target;if(d.classList&&d.classList.contains("nt")&&d.open&&!d.querySelector(".fiche"))fiche(d);},true);
+$("tree").addEventListener("click",function(e){
+  var b=e.target.closest("[data-a=more]");if(!b)return;
+  var det=b.closest("details.nt"),id=det.getAttribute("data-id");
+  det.querySelector(".exs").innerHTML=examples(id,2).map(exHtml).join("");
+});
+$("niv").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;NIV=b.getAttribute("data-v");store.set("rev_niv",NIV);render();});
+var T=null;$("q").addEventListener("input",function(){clearTimeout(T);var v=this.value;T=setTimeout(function(){Q=norm(v.trim());render();},180);});
+$("brand").outerHTML=brandHtml("révisions","index.html");
+$("foot").innerHTML=footHtml();
+initZoom("rev",$("zoom"));
+pwaInit();
+render();
+/* lien direct vers une notion : revisions.html#pct_de */
+function goHash(){
+  var hid=location.hash.replace("#","");if(!hid||!ITEM_BY_ID[hid])return;
+  var it=ITEM_BY_ID[hid];if(it.niv.indexOf(NIV)<0){NIV=it.niv[0];}
+  Q="";$("q").value="";render();
+  var d=document.querySelector('details.nt[data-id="'+hid+'"]');if(!d)return;
+  d.closest("details.chap").open=true;d.closest("details.sub").open=true;d.open=true;if(!d.querySelector(".fiche"))fiche(d);
+  setTimeout(function(){d.scrollIntoView({block:"start"});window.scrollBy(0,-120);},120);
+}
+window.addEventListener("hashchange",goHash);goHash();
+})();
+</script>
+</body>
+</html>

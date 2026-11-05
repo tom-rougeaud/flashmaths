@@ -22,6 +22,7 @@ document.addEventListener("click",function(e){if(!e.target.closest(".menu-w"))$(
 $("menu").addEventListener("click",function(e){
   var b=e.target.closest("[data-m]");if(!b)return;$("menu").classList.add("hidden");
   var m=b.getAttribute("data-m");
+  if(m==="pwa"){pwaHelp();return;}
   if(m==="hist"){openModal("m-hist");renderHist("local");}
   else if(m==="mine")openMine();
   else if(m==="diag")openDiag();
@@ -38,7 +39,7 @@ function dbBanner(){
   w.className="hidden";
   rpc("fm_ping",{},8000).then(function(r){
       if(r&&r.ok)netPill("ok","Base connectée");else netPill("ko","Base : réponse inattendue");
-      if(r&&r.ok&&r.version<4){w.className="warn";w.innerHTML="<b>Mise à jour de la base nécessaire :</b> relancez une fois le script <code>flash_maths.sql</code> dans Supabase (SQL Editor → Run). Sans cela, le code prof du mode Classe VS Prof ne fonctionne pas.";}
+      if(r&&r.ok&&r.version<5){w.className="warn";w.innerHTML="<b>Mise à jour de la base nécessaire :</b> relancez une fois le script <code>flash_maths.sql</code> dans Supabase (SQL Editor → Run). Sans cela, "+(r.version<4?"le code prof du mode Classe VS Prof et ":"")+"la Mêlée entre élèves ne fonctionne"+(r.version<4?"nt":"")+" pas.";}
     })
     .catch(function(e){netPill("ko","Base injoignable");w.className="err";w.innerHTML=esc(netErrText(e))+' <a href="#" id="dbw-go">Ouvrir le diagnostic</a>';$("dbw-go").addEventListener("click",function(ev){ev.preventDefault();openDiag();});});
 }
@@ -58,7 +59,7 @@ $("m-q").addEventListener("click",function(e){if(e.target.id==="m-q"){var q=QS[M
 (function init(){
   $("brand").outerHTML=brandHtml("prof","index.html");
   $("foot").innerHTML=footHtml();
-  initZoom("prof",$("zoom"));fitWatch($("s-game"));
+  initZoom("prof",$("zoom"));fitWatch($("s-game"));pwaInit();
   loadSetup();soundBtn();
   setView(P.view||(window.innerWidth<720?"mob":"proj"));
   refreshAll();dbBanner();

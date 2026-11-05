@@ -27,11 +27,11 @@ async def main():
         sub=prof.locator('#tree details.chap[open] details.sub').first
         nm=(await sub.locator('summary .sn').text_content()).strip()
         await sub.locator('summary input.chk').check();await prof.wait_for_timeout(200)
-        print('sous-chapitre coché :',nm,'| notions sélectionnées :',await prof.evaluate('P.sel.length'),'| compteur :',(await prof.locator('#tree details.chap[open] > summary .cnt').text_content()).strip())
+        print('sous-chapitre coché :',nm,'| notions sélectionnées :',await prof.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.sel.length'),'| compteur :',(await prof.locator('#tree details.chap[open] > summary .cnt').text_content()).strip())
         print('profondeurs (chapitres / sous-chapitres / notions) :',await prof.evaluate('[document.querySelectorAll("#tree details.chap").length,document.querySelectorAll("#tree details.sub").length,document.querySelectorAll("#tree .it").length]'))
         await prof.screenshot(path=OUT+'tree.png',full_page=True)
         # partie : duel, lecture 3 s, justesse seule
-        await prof.evaluate('P.sel=["pct_mental","tables"];P.vary=false;P.est=false;P.nq=2;P.mode="duel";P.auto=false;P.dur=20;P.read=3;P.pts="juste";saveSetup();refreshAll()')
+        await prof.evaluate('P.fk=["qcm","vf","libre","slider","tuiles","etape","intrus","trou","qui"];P.sel=["pct_mental","tables"];P.vary=false;P.est=false;P.nq=2;P.mode="duel";P.auto=false;P.dur=20;P.read=3;P.pts="juste";saveSetup();refreshAll()')
         await prof.click('#b-gen');await prof.wait_for_timeout(300);await prof.click('#b-open');await prof.wait_for_timeout(900)
         code=(await prof.text_content('#lb-code')).strip()
         s=[await stud(ctx,code,n) for n in ['Léa','Hugo','Nina']]

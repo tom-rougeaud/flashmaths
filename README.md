@@ -28,6 +28,18 @@ Le prof règle la partie, choisit des notions dans le programme de son niveau, v
   <img src="readme-eleve.png" alt="Sur le téléphone : temps de lecture, réponse, guirlande de fin" width="760">
 </p>
 
+## Nouveautés de la version 4.0
+
+- **Application installable** sur téléphone, tablette et PC (bouton *Installer l’appli*), qui s’ouvre même sans réseau pour l’entraînement et les révisions.
+- **Mêlée entre élèves**, sans prof : un·e élève crée la salle sur son téléphone, les autres la rejoignent par code ou QR code, chacun·e propose une notion, et la partie démarre quand tout le monde est prêt.
+- **Page Révisions** : le programme par niveau, avec pour chaque notion des exemples corrigés, les erreurs types à éviter et un lien « M’entraîner sur cette notion ».
+- **Entraînement seul enrichi** : plusieurs chapitres à la fois, notions « À revoir », 5 à 50 questions, choix des types de questions, pause et reprise plus tard.
+- **Pari de certitude** (option du prof) : l’élève peut parier sur sa réponse, ce qui double les points si elle est juste et en retire 300 si elle est fausse. Le bilan signale les élèves « sûr(e)s mais faux ».
+- **Quatre nouveaux formats** : *trouver l’intrus*, *texte à trous*, *qui suis-je ?* et *plusieurs bonnes réponses* (points partiels si la moitié au moins des bonnes réponses est cochée, sans erreur).
+- **Types de questions à cocher** (10 types) et **niveau de difficulté** (★ à ★★★) dans les réglages du prof.
+- **Duel direct** en Duel d’équipes : une fois par manche de 5 questions, les deux équipes en tête votent pour leur champion ou leur championne. Seuls les deux élèves choisi·es répondent, et le plus rapide des deux s’il a juste rapporte 300 points à son équipe.
+- **Masquer l’écran** au tableau, par exemple pour que le prof réponde en secret dans La Classe VS le Prof avec un seul appareil.
+
 ## Nouveautés de la version 3.6
 
 - **Tous les écrans s’ajustent** (code, prénom, salle, règles, questions, correction, fin), en largeur comme en hauteur : la place restante agrandit les réponses ou centre le contenu, sans défilement.
@@ -60,25 +72,29 @@ Le prof règle la partie, choisit des notions dans le programme de son niveau, v
 - **Générer** : toutes les questions sont visibles et modifiables avant de jouer (réponses masquées par défaut pour projeter), réordonnables, avec un nouveau tirage question par question.
 - **Import de questions** en texte simple : `*` devant la bonne réponse, `= 4,5` pour une saisie libre, tuiles, remise en ordre, estimation.
 - Temps de réponse : automatique, 15 s à 5 min, ou un temps propre à chaque notion.
-- En jeu : **Agrandir le média** (figure ou formule en plein écran), **+30 s**, **Corriger maintenant**, **Écourter**, enchaînement automatique activable à tout moment, réponse de chaque joueur après chaque question.
+- Types de questions à cocher, difficulté, **pari de certitude** en option.
+- En jeu : **Agrandir le média**, **Masquer l’écran** (figure ou formule en plein écran), **+30 s**, **Corriger maintenant**, **Écourter**, enchaînement automatique activable à tout moment, réponse de chaque joueur après chaque question.
 - QR code en plein écran, fenêtre **Joueurs** (renommer, exclure, retardataire), alerte quand un élève quitte la page du jeu.
 - Fin de partie : diagnostic des erreurs types, bilan par élève et par question, exports CSV, historique.
 
-**Trois modes de jeu**
+**Quatre modes de jeu**
 
 | Mode | Principe | Au tableau |
 |---|---|---|
 | **Un contre tous** | Chacun joue pour soi | Top 5 en direct, guirlande des 3 meilleurs |
-| **Duel d’équipes** | Les élèves glissent leur prénom dans une équipe | Course de fusées, guirlande des équipes |
+| **Duel d’équipes** | Les élèves glissent leur prénom dans une équipe, avec un **duel direct** entre champions par manche | Course de fusées, guirlande des équipes |
 | **La Classe VS le Prof** | Les bonnes réponses de la classe infligent des dégâts à la jauge de vie du prof, celles du prof (sur son téléphone, avec un handicap au choix) à celle de la classe | Combat avec jauges de vie |
+| **Mêlée entre élèves** | Sans prof : un téléphone d’élève fait tourner la partie, chacun·e propose une notion | Classement sur chaque téléphone |
 
 **Côté élève**
 - Code, prénom (ou pseudo au hasard), et c’est parti. Les noms grossiers sont refusés.
-- QCM, Vrai/Faux, **saisie libre avec clavier virtuel**, **tuiles à associer**, **remise en ordre**, **estimation au curseur**, **étape fausse** à trouver, **figures** (triangles, Thalès, repères, arbres, diagrammes, tableaux, programmes).
+- QCM, Vrai/Faux, **saisie libre avec clavier virtuel**, **tuiles à associer**, **remise en ordre**, **estimation au curseur**, **étape fausse** à trouver, **intrus**, **texte à trous**, **qui suis-je ?**, **plusieurs bonnes réponses**, **figures** (triangles, Thalès, repères, arbres, diagrammes, tableaux, programmes).
 - Toutes les écritures équivalentes sont acceptées : `4,5` = `4,50` = `450 %` = `9/2`, et `3x + 2` = `2 + 3x`.
-- **Entraînement seul**, même hors connexion, avec un carnet qui repropose les notions à revoir.
+- **Entraînement seul**, même hors connexion, avec un carnet qui repropose les notions à revoir, pause et reprise.
+- **Révisions** : fiches par notion (exemples corrigés, erreurs à éviter).
+- **Mêlée** entre élèves, sans prof.
 
-**Contenu** : 168 notions (dont 396 questions de cours). Chaque mauvaise réponse correspond à une erreur type, ce qui permet le diagnostic de fin de partie. Les formules sont écrites avec KaTeX.
+**Contenu** : 168 notions (dont 508 questions de cours). Chaque mauvaise réponse correspond à une erreur type, ce qui permet le diagnostic de fin de partie. Les formules sont écrites avec KaTeX.
 
 ## Installation (15 minutes, une seule fois)
 
@@ -87,7 +103,7 @@ L’application est faite de pages statiques hébergées sur **GitHub Pages**. E
 1. **Supabase** : créez un projet (région Union européenne). Dans *SQL Editor*, collez le contenu de `flash_maths.sql` puis cliquez sur *Run*.
 2. **config.js** : collez-y la *Project URL* et la clé publique *publishable / anon* du projet (jamais la clé *secret* ni *service_role*).
 3. **GitHub Pages** : *Settings → Pages → Deploy from a branch → main / (root)*.
-4. **Vérification** : ouvrez `prof.html`, puis menu ☰ → *Diagnostic de la base*. Les trois lignes doivent être vertes.
+4. **Vérification** : ouvrez `prof.html`, puis menu ☰ → *Diagnostic de la base*. Les lignes doivent être vertes, avec la version 5 de la base.
 
 Le pas à pas détaillé, avec le dépannage, se trouve dans la notice PDF fournie avec l’application (à garder pour soi, à ne pas publier ici).
 
@@ -97,10 +113,12 @@ Le pas à pas détaillé, avec le dépannage, se trouve dans la notice PDF fourn
 |---|---|
 | `index.html` | Accueil : « Je suis prof » / « Je suis élève » |
 | `prof.html` | Espace prof : régler, choisir, vérifier, ouvrir la salle, jouer, bilans |
-| `eleve.html` | Espace élève : code, prénom, jeu, entraînement, carnet |
+| `eleve.html` | Espace élève : code, prénom, jeu, mêlée, entraînement, carnet |
+| `revisions.html` | Fiches de révision par notion |
+| `manifest.json`, `sw.js`, `icon-*.png` | Application installable et fonctionnement hors connexion |
 | `contact.html`, `confidentialite.html` | Contact et confidentialité |
 | `config.js` | Adresse et clé publique de la base Supabase |
-| `flash_maths.sql` | Script de la base (version 4) |
+| `flash_maths.sql` | Script de la base (version 5) |
 | `source/` | Code source : `src/` (à assembler avec `build.py`), banque de questions, programme, tests automatiques |
 
 Chaque page HTML est autonome : polices, formules (KaTeX), QR code et client Supabase sont intégrés. Aucun CDN, aucune police externe, aucun traceur.
@@ -109,7 +127,8 @@ Chaque page HTML est autonome : polices, formules (KaTeX), QR code et client Sup
 
 - La base ne contient que les codes de salle et les prénoms ou pseudos (effacés 4 h après la dernière activité) et les bilans des parties (effacés après 30 jours). Aucune adresse e-mail, aucun nom de famille.
 - Les réponses des élèves passent en direct et ne sont jamais enregistrées dans la base.
-- Le carnet de l’élève et les questions du prof restent dans le navigateur de l’appareil.
+- Le carnet de l’élève, son entraînement en pause et les questions du prof restent dans le navigateur de l’appareil.
+- En Mêlée, la partie tourne sur le téléphone de l’élève qui l’a créée ; comme pour une partie avec prof, la base ne reçoit que le code de salle et les prénoms, et les réponses passent en direct sans être enregistrées.
 
 ## Licence
 
